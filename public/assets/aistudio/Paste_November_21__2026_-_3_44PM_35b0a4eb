@@ -1,0 +1,2741 @@
+# AQUARIUM IDLE TYCOON
+## FEEDING AUTOMATION + CREATURE EXPANSION + ENCYCLOPEDIA + 20 MAPS + MILESTONE SYSTEM
+
+You are continuing development of the existing **Pixel Art Aquarium Idle Tycoon / Ecosystem Tycoon mobile game**.
+
+This is an ADDITIONAL GAMEPLAY EXPANSION.
+
+Do NOT rebuild the project from scratch.
+
+Do NOT remove existing systems.
+
+Preserve the existing:
+
+- Fish system
+- Fish growth
+- Fish breeding
+- Fish schooling
+- Water quality
+- Oxygen
+- Decoration effects
+- Creature income
+- Aquarium upgrades
+- Map progression
+- Research
+- Offline progression
+- Tutorial
+- Localization
+- Save system
+
+Extend the existing architecture in a modular and data-driven way.
+
+The new goal is to make:
+
+**FEEDING + FISH SURVIVAL + AUTOMATION + CREATURE COLLECTION + MAP COMPLETION + ACHIEVEMENT MILESTONES**
+
+become major long-term progression systems.
+
+---
+
+# 1. NEW CORE LOOP
+
+Expand the core gameplay loop into:
+
+COLLECT INCOME
+
+↓
+
+BUY FISH / CREATURES
+
+↓
+
+PLACE FISH
+
+↓
+
+FEED FISH
+
+↓
+
+KEEP WATER HEALTHY
+
+↓
+
+FISH GROW
+
+↓
+
+FISH BREED
+
+↓
+
+POPULATION INCREASES
+
+↓
+
+UPGRADE FEEDING
+
+↓
+
+UPGRADE AQUARIUM
+
+↓
+
+AUTOMATE FEEDING
+
+↓
+
+DISCOVER NEW SPECIES
+
+↓
+
+COMPLETE MAP ENCYCLOPEDIA
+
+↓
+
+REACH MILESTONE
+
+↓
+
+RETURN TO OLD MAP
+
+↓
+
+UPGRADE OLD MAP FURTHER
+
+↓
+
+INCREASE CAPACITY / SPECIES / PRODUCTION
+
+↓
+
+UNLOCK NEW MAP
+
+This creates an endless progression loop.
+
+---
+
+# 2. FEEDING SYSTEM
+
+Introduce a dedicated:
+
+**FISH FOOD SYSTEM**
+
+Every aquarium has a food requirement.
+
+Fish consume food over time.
+
+Food consumption depends on:
+
+- fish size
+- species
+- population
+- activity
+- metabolism
+- rarity
+- environmental conditions
+
+Large fish consume more food than small fish.
+
+Example:
+
+Tiny Fish:
+
+1 Food / cycle
+
+Small Fish:
+
+2 Food / cycle
+
+Medium Fish:
+
+4 Food / cycle
+
+Large Fish:
+
+8 Food / cycle
+
+Huge Fish:
+
+15 Food / cycle
+
+These values must be configurable in FishData.
+
+Do NOT hardcode them.
+
+---
+
+# 3. FISH HUNGER
+
+Each fish has:
+
+**Hunger / Nutrition**
+
+Example:
+
+100%
+
+↓
+
+75%
+
+↓
+
+50%
+
+↓
+
+25%
+
+↓
+
+10%
+
+↓
+
+0%
+
+Fish should NOT immediately die when hunger reaches zero.
+
+Use progressive consequences.
+
+### 75–100%
+
+Healthy
+
+Normal movement
+
+Normal growth
+
+Normal breeding
+
+---
+
+### 50–75%
+
+Hungry
+
+Slightly slower growth
+
+Reduced happiness
+
+---
+
+### 25–50%
+
+Very Hungry
+
+Growth significantly reduced
+
+Reduced breeding probability
+
+Reduced income
+
+---
+
+### 10–25%
+
+Starving
+
+Fish becomes visibly slower
+
+Fish searches for food
+
+Health begins decreasing
+
+---
+
+### 0–10%
+
+Critical
+
+Fish becomes weak
+
+Very low movement
+
+Very low growth
+
+Very low breeding
+
+Health decreases rapidly
+
+---
+
+### 0%
+
+Starvation
+
+Fish can eventually die if the condition remains unresolved.
+
+Do NOT instantly kill the fish.
+
+Give the player enough time to notice and fix the problem.
+
+---
+
+# 4. FISH DEATH FROM STARVATION
+
+If a fish remains without enough food for a configurable amount of time:
+
+Fish Health reaches:
+
+0
+
+Then:
+
+**Fish Dies**
+
+The death should be visually communicated.
+
+Possible animation:
+
+Fish slows down
+
+↓
+
+stops swimming
+
+↓
+
+fades / falls slightly
+
+↓
+
+small particles
+
+↓
+
+removed from active population
+
+Do NOT make fish death feel random.
+
+Before death:
+
+show warnings.
+
+Example:
+
+"Your fish are hungry!"
+
+"Food supplies are running low."
+
+"Some fish are at risk!"
+
+"Fish need food to survive."
+
+The player should always understand WHY the fish died.
+
+---
+
+# 5. FOOD STORAGE PER AQUARIUM
+
+Every aquarium has its own:
+
+**Food Capacity**
+
+Example:
+
+Level 1:
+
+100 Food
+
+Level 2:
+
+150 Food
+
+Level 3:
+
+250 Food
+
+Level 4:
+
+400 Food
+
+Level 5:
+
+650 Food
+
+etc.
+
+The exact values should be controlled by:
+
+FoodCapacityUpgradeData.
+
+Food storage is LOCAL to each aquarium.
+
+Do NOT share food capacity between all maps.
+
+---
+
+# 6. FOOD CAPACITY UPGRADE
+
+Create a dedicated upgrade:
+
+**Food Storage**
+
+This determines how much food the aquarium can store.
+
+Example:
+
+Food Storage
+
+Level 1:
+
+100
+
+Level 2:
+
+150
+
+Level 3:
+
+225
+
+Level 4:
+
+350
+
+Level 5:
+
+550
+
+Level 10:
+
+2,000
+
+Level 20:
+
+10,000
+
+Level 50:
+
+100,000
+
+Use a configurable progression curve.
+
+The player should constantly have a meaningful reason to upgrade food capacity.
+
+---
+
+# 7. MANUAL FEEDING
+
+The player can manually feed fish.
+
+Add a:
+
+**FEED**
+
+button.
+
+When tapped:
+
+Food is released into the aquarium.
+
+Fish swim toward food.
+
+Play:
+
+- food particle animation
+- fish reaction
+- bubbles
+- eating animation
+- sound
+- floating feedback
+
+Manual feeding should be more powerful than automatic feeding.
+
+---
+
+# 8. MANUAL FEEDING BONUS
+
+Manual feeding should provide:
+
+**ACTIVE FEEDING BONUS**
+
+Example:
+
+Manual Feeding:
+
+100 Food
+
+may provide:
+
++100 Food consumed
+
++
+
+Growth Bonus
+
++
+
+Happiness Bonus
+
++
+
+Breeding Progress
+
++
+
+Small XP
+
+Automatic feeding:
+
+100 Food
+
+may provide:
+
++100 Food consumed
+
+but without the full active bonuses.
+
+Therefore:
+
+### Manual Feeding
+
+Higher efficiency
+
+Higher growth
+
+Higher happiness
+
+Better breeding
+
+---
+
+### Auto Feeding
+
+Reliable
+
+Convenient
+
+Maintains survival
+
+But slightly less efficient
+
+This creates:
+
+**Active Play > Idle Play**
+
+without making automation useless.
+
+---
+
+# 9. MANUAL FEEDING LIMIT
+
+Prevent unlimited tapping.
+
+Each aquarium has:
+
+**Manual Feeding Capacity**
+
+or
+
+**Manual Feeding Energy**
+
+Example:
+
+The player can manually perform:
+
+5 feeding actions
+
+before a short cooldown.
+
+The limit can be upgraded.
+
+Do NOT allow infinite feeding spam.
+
+Manual feeding should be:
+
+meaningful
+
+but
+
+not mandatory every few seconds.
+
+---
+
+# 10. AUTO FEEDING SYSTEM
+
+Add:
+
+**AUTO FEEDER**
+
+This is a dedicated aquarium upgrade.
+
+The Auto Feeder automatically feeds fish.
+
+Example:
+
+Every:
+
+30 seconds
+
+it checks:
+
+Current Food
+
+Fish Population
+
+Average Hunger
+
+Then automatically releases enough food.
+
+---
+
+# 11. AUTO FEEDER BEHAVIOR
+
+The Auto Feeder should prioritize fish that need food.
+
+Priority:
+
+Critical Hunger
+
+↓
+
+Starving
+
+↓
+
+Very Hungry
+
+↓
+
+Hungry
+
+↓
+
+Healthy
+
+Do not waste food unnecessarily.
+
+If all fish are healthy:
+
+The Auto Feeder can remain idle.
+
+---
+
+# 12. AUTO FEEDER LEVEL
+
+Every aquarium has its own:
+
+**Auto Feeder Level**
+
+Example:
+
+Level 0:
+
+No automation
+
+Level 1:
+
+Feeds every 60 seconds
+
+Level 2:
+
+Feeds every 45 seconds
+
+Level 3:
+
+Feeds every 30 seconds
+
+Level 4:
+
+Feeds every 20 seconds
+
+Level 5:
+
+Feeds every 15 seconds
+
+Higher levels can also improve:
+
+- feeding accuracy
+- food efficiency
+- maximum food amount per cycle
+- hunger recovery
+
+Use configurable data.
+
+---
+
+# 13. AUTO FEEDING QUALITY
+
+Auto feeding should NOT simply mean:
+
+"Everything is permanently full."
+
+Instead:
+
+Higher Auto Feeder levels provide better feeding efficiency.
+
+Example:
+
+Level 1:
+
+Maintains approximately 40–60% hunger
+
+Level 5:
+
+Maintains approximately 60–75%
+
+Level 10:
+
+Maintains approximately 75–90%
+
+Manual feeding can temporarily push fish toward:
+
+100%
+
+This preserves the value of active play.
+
+---
+
+# 14. AUTO FEEDING VISUAL FEEDBACK
+
+Even when automatic:
+
+Show the system visually.
+
+Example:
+
+Food pellets appear.
+
+Fish gather.
+
+Auto Feeder activates.
+
+Small animation:
+
+**AUTO FEED**
+
+Then:
+
+Food particles disappear.
+
+Do not make automatic systems completely invisible.
+
+The aquarium should feel alive.
+
+---
+
+# 15. AUTO FEEDER UPGRADE TREE
+
+Create a dedicated upgrade tree:
+
+### FEEDING SPEED
+
+How often the feeder operates.
+
+### FEEDING CAPACITY
+
+How much food can be released.
+
+### FEEDING EFFICIENCY
+
+Less food wasted.
+
+### FEEDING RANGE
+
+Can feed more fish simultaneously.
+
+### SMART TARGETING
+
+Prioritizes hungry fish.
+
+### ADVANCED FEEDER
+
+Supports special diets.
+
+### AI FEEDER
+
+Automatically predicts food demand.
+
+This creates long-term progression.
+
+---
+
+# 16. FOOD PRODUCTION
+
+Do NOT make food infinite.
+
+Food should have a production source.
+
+Possible sources:
+
+- Aquarium shop
+- Daily production
+- Plant farming
+- Shrimp farms
+- Food factory
+- Map-specific food sources
+- Research bonuses
+- Events
+
+Early game:
+
+Player manually purchases food.
+
+Mid game:
+
+Food production begins.
+
+Late game:
+
+Food production becomes automated.
+
+This creates another idle production chain.
+
+---
+
+# 17. FOOD ECONOMY
+
+Food should be a separate resource.
+
+Do NOT automatically convert coins into food every second.
+
+Possible economy:
+
+Coins
+
+→
+
+Buy Food
+
+or
+
+Food Production
+
+→
+
+Food Storage
+
+→
+
+Fish Consumption
+
+→
+
+Fish Growth
+
+This prevents the economy from becoming too simple.
+
+---
+
+# 18. FOOD PRODUCTION UPGRADES
+
+Add:
+
+**Food Factory**
+
+or map-appropriate food production.
+
+Levels improve:
+
+- Food Production Speed
+- Food Storage
+- Food Efficiency
+
+Example:
+
+Level 1:
+
++10 Food/min
+
+Level 10:
+
++100 Food/min
+
+Level 50:
+
++2,000 Food/min
+
+Use scalable formulas.
+
+---
+
+# 19. FISH DIET TYPES
+
+Add different diet categories.
+
+Examples:
+
+### HERBIVORE
+
+Consumes plant-based food.
+
+### CARNIVORE
+
+Consumes protein food.
+
+### OMNIVORE
+
+Consumes mixed food.
+
+### FILTER FEEDER
+
+Consumes special food particles.
+
+### SPECIAL DIET
+
+Rare creatures require special food.
+
+This gives different species more identity.
+
+---
+
+# 20. MAP-SPECIFIC FOOD
+
+Different habitats should introduce different food types.
+
+Pond:
+
+- algae
+- insects
+
+Lake:
+
+- plankton
+- small organisms
+
+River:
+
+- insects
+- larvae
+
+Mangrove:
+
+- shrimp food
+- crustacean food
+
+Coral Reef:
+
+- plankton
+- reef food
+
+Ocean:
+
+- fish food
+- squid food
+
+Deep Ocean:
+
+- deep-sea food
+
+Do NOT create excessive complexity early.
+
+Use simple food categories with specialized visuals.
+
+---
+
+# 21. NEW CREATURE SYSTEM
+
+Expand the creature database substantially.
+
+Do NOT limit the game to only fish.
+
+Supported creature categories:
+
+### FISH
+
+Small
+
+Medium
+
+Large
+
+Predator
+
+Schooling
+
+Solitary
+
+---
+
+### RAY
+
+Large elegant swimming creatures.
+
+Preferred habitat:
+
+Ocean / Deep Ocean
+
+---
+
+### SHARK
+
+Large predator.
+
+Preferred habitat:
+
+Open Ocean / Deep Ocean
+
+Requires:
+
+Large space
+
+Large food supply
+
+Special habitat
+
+---
+
+### TURTLE
+
+Slow-moving.
+
+Preferred habitat:
+
+Coastal / Coral / Ocean
+
+Special:
+
+Long lifespan
+
+Low movement
+
+High Beauty Score
+
+---
+
+### JELLYFISH
+
+Floating / pulsing.
+
+Preferred habitat:
+
+Ocean / Deep Ocean
+
+Special:
+
+Beautiful movement
+
+High Beauty
+
+---
+
+### SNAIL
+
+Bottom creature.
+
+Preferred habitat:
+
+Pond / Lake / Reef
+
+Special:
+
+Consumes algae
+
+Improves water quality
+
+---
+
+### SHRIMP
+
+Small cleaning creature.
+
+Special:
+
+Reduces waste
+
+---
+
+### CRAB
+
+Bottom creature.
+
+Special:
+
+Produces income
+
+---
+
+### OCTOPUS
+
+Intelligent rare creature.
+
+Special:
+
+High income
+
+High food requirement
+
+---
+
+### SQUID
+
+Fast swimmer.
+
+Special:
+
+High movement
+
+Large space requirement
+
+---
+
+### CLAM
+
+Stationary.
+
+Special:
+
+Slow high-value production
+
+---
+
+### STARFISH
+
+Bottom decoration/creature.
+
+Special:
+
+Beauty
+
+---
+
+### SEAHORSE
+
+Small rare creature.
+
+Special:
+
+High rarity
+
+Special breeding requirements
+
+---
+
+# 22. CREATURE HABITAT RESTRICTION
+
+Every creature has preferred habitats.
+
+Example:
+
+Shark:
+
+Ocean
+
+Deep Ocean
+
+NOT:
+
+Pond
+
+Turtle:
+
+Mangrove
+
+Coral Reef
+
+Ocean
+
+Jellyfish:
+
+Ocean
+
+Deep Ocean
+
+Snail:
+
+Pond
+
+Lake
+
+Reef
+
+The game should prevent invalid placement or clearly communicate:
+
+"This creature cannot live in this habitat."
+
+---
+
+# 23. CREATURE REQUIREMENTS
+
+Every major creature should have:
+
+- Food Requirement
+- Space Requirement
+- Oxygen Requirement
+- Water Quality Requirement
+- Temperature Requirement
+- Habitat Requirement
+- Growth Time
+- Income
+- Beauty Score
+- Rarity
+
+Large creatures should have significantly higher requirements.
+
+This prevents the player from filling an aquarium with only powerful creatures.
+
+---
+
+# 24. LARGE CREATURE BALANCE
+
+Sharks, rays, turtles and large creatures should NOT simply be:
+
+"better fish."
+
+They should introduce trade-offs.
+
+Example:
+
+Shark:
+
+High Beauty
+
+High Prestige
+
+High Income
+
+BUT:
+
+Very high food consumption
+
+Large space requirement
+
+Requires advanced filtration
+
+Requires high oxygen
+
+This creates strategic choices.
+
+---
+
+# 25. CREATURE MOVEMENT
+
+Large creatures need different movement systems.
+
+Shark:
+
+Large smooth swimming path.
+
+Ray:
+
+Slow elegant gliding.
+
+Turtle:
+
+Slow steady movement.
+
+Jellyfish:
+
+Vertical drifting / pulsing.
+
+Squid:
+
+Fast directional movement.
+
+Octopus:
+
+Short movement bursts.
+
+Snail:
+
+Slow bottom movement.
+
+Crab:
+
+Sideways walking.
+
+Do NOT use the same movement algorithm for every creature.
+
+Use:
+
+CreatureMovementProfile.
+
+---
+
+# 26. AQUARIUM SCALE
+
+Large creatures should visibly require more space.
+
+The player should immediately understand:
+
+"That shark needs a big aquarium."
+
+Use:
+
+- size comparison
+- movement range
+- territory
+- space requirement
+
+When a large creature is placed:
+
+Show a subtle visual preview of its required space.
+
+---
+
+# 27. MAP CREATURE PROGRESSION
+
+Example:
+
+### POND
+
+Fish
+
+Snail
+
+Frog
+
+Crayfish
+
+Freshwater Shrimp
+
+---
+
+### LAKE
+
+Fish
+
+Crayfish
+
+Freshwater Turtle
+
+Mussel
+
+Large Lake Fish
+
+---
+
+### RIVER
+
+Fish
+
+River Shrimp
+
+River Crab
+
+Otter-like rare creature
+
+Large River Fish
+
+---
+
+### WETLAND
+
+Fish
+
+Frog
+
+Snail
+
+Turtle
+
+Crab
+
+---
+
+### MANGROVE
+
+Mangrove Crab
+
+Shrimp
+
+Mudskipper
+
+Turtle
+
+Shellfish
+
+---
+
+### CORAL REEF
+
+Clownfish
+
+Butterflyfish
+
+Tropical Fish
+
+Cleaner Shrimp
+
+Starfish
+
+Sea Turtle
+
+Jellyfish
+
+---
+
+### OPEN OCEAN
+
+Shark
+
+Ray
+
+Tuna
+
+Dolphin-like rare creature
+
+Squid
+
+Turtle
+
+Jellyfish
+
+---
+
+### DEEP OCEAN
+
+Deep Sea Fish
+
+Giant Squid
+
+Deep Sea Jellyfish
+
+Anglerfish
+
+Rare Shark
+
+Deep Sea Ray
+
+Bioluminescent creatures
+
+---
+
+# 28. CREATURE COLLECTION
+
+Every creature should be collectible.
+
+Collection page:
+
+Fish
+
+Creatures
+
+Rare Variants
+
+Legendary Species
+
+Show:
+
+Discovered:
+
+24 / 80
+
+or appropriate total.
+
+Each species should have:
+
+- silhouette
+- image
+- rarity
+- habitat
+- food
+- behavior
+- special effect
+- discovery date
+
+---
+
+# 29. AQUARIUM ENCYCLOPEDIA
+
+Create a permanent:
+
+**AQUARIUM ENCYCLOPEDIA**
+
+This is the player's biological collection book.
+
+The encyclopedia should contain all species.
+
+Categories:
+
+### FISH
+
+### MAMMALS
+
+### REPTILES
+
+### CRUSTACEANS
+
+### MOLLUSKS
+
+### JELLYFISH
+
+### CORALS
+
+### OTHER CREATURES
+
+---
+
+# 30. MAP SPECIES INDEX
+
+Each map has its own species completion.
+
+Example:
+
+## LITTLE POND
+
+Fish:
+
+25 / 25
+
+Creatures:
+
+5 / 5
+
+Total:
+
+30 / 30
+
+---
+
+## CORAL REEF
+
+Fish:
+
+25 / 25
+
+Creatures:
+
+12 / 12
+
+Total:
+
+37 / 37
+
+---
+
+## OPEN OCEAN
+
+Fish:
+
+25 / 25
+
+Creatures:
+
+15 / 15
+
+Total:
+
+40 / 40
+
+This should be visible from the map screen.
+
+---
+
+# 31. ENCYCLOPEDIA MAP OVERVIEW
+
+The encyclopedia should show:
+
+Map
+
+↓
+
+Total Species
+
+↓
+
+Discovered
+
+↓
+
+Remaining
+
+↓
+
+Completion %
+
+↓
+
+Completion Rewards
+
+Example:
+
+CORAL REEF
+
+Species:
+
+37
+
+Discovered:
+
+29
+
+Completion:
+
+78%
+
+Reward:
+
+Rare Coral Decoration
+
+---
+
+# 32. SPECIES DISCOVERY
+
+When a new species is obtained:
+
+Trigger:
+
+**NEW DISCOVERY**
+
+Animation:
+
+- silhouette
+- reveal
+- sparkle
+- species name
+- rarity
+- habitat
+
+Then:
+
+"Added to Encyclopedia"
+
+This should feel like collecting a Pokémon-like entry, but remain original and aquarium-themed.
+
+---
+
+# 33. 20+ MAP SYSTEM
+
+Expand the game from 8 maps to:
+
+**AT LEAST 20 DISTINCT MAPS.**
+
+Do not make 20 copies of the same aquarium.
+
+Every map must have:
+
+- unique environment
+- unique fish
+- unique creatures
+- unique decorations
+- unique ecosystem
+- unique progression
+- unique visual identity
+
+Recommended progression:
+
+01 Little Pond
+
+02 Garden Pond
+
+03 Forest Lake
+
+04 Mountain Lake
+
+05 River
+
+06 Rapids
+
+07 Wetland
+
+08 Swamp
+
+09 Mangrove
+
+10 Estuary
+
+11 Tropical Lagoon
+
+12 Coral Reef
+
+13 Deep Coral Reef
+
+14 Kelp Forest
+
+15 Coastal Ocean
+
+16 Open Ocean
+
+17 Deep Ocean
+
+18 Abyss
+
+19 Bioluminescent Trench
+
+20 Legendary Ocean
+
+The exact names can be changed during production.
+
+---
+
+# 34. MAP PROGRESSION PHILOSOPHY
+
+Each new map should introduce at least:
+
+1 new fish category
+
+OR
+
+1 new creature
+
+OR
+
+1 new ecosystem mechanic
+
+OR
+
+1 new decoration mechanic
+
+OR
+
+1 new progression layer.
+
+Never unlock a new map that is only:
+
+"Same gameplay + different background."
+
+---
+
+# 35. MAP CONTENT TARGET
+
+Target approximately:
+
+25 fish per map
+
++
+
+5–15 creatures per map
+
++
+
+15–30 decorations per map
+
++
+
+unique research nodes
+
++
+
+unique collection rewards
+
+With 20 maps:
+
+Approximately:
+
+500+ fish entries
+
+100–200+ creature entries
+
+300–600+ decorations
+
+This creates long-term collection depth.
+
+Do NOT implement all content immediately.
+
+Build scalable systems first.
+
+---
+
+# 36. MAP LOCAL UPGRADES
+
+Every map maintains independent upgrades.
+
+Example:
+
+Pond:
+
+Level 20
+
+Lake:
+
+Level 8
+
+Coral:
+
+Level 1
+
+Ocean:
+
+Locked
+
+Upgrading Pond does NOT upgrade Lake.
+
+This rule is mandatory.
+
+---
+
+# 37. MILESTONE ACHIEVEMENT SYSTEM
+
+Introduce a major:
+
+**MILESTONE / ACHIEVEMENT SYSTEM**
+
+Achievements should represent long-term accomplishments.
+
+Examples:
+
+Discover:
+
+10 species
+
+25 species
+
+50 species
+
+100 species
+
+250 species
+
+500 species
+
+---
+
+Breed:
+
+10 fish
+
+50 fish
+
+100 fish
+
+500 fish
+
+---
+
+Aquarium:
+
+Level 10
+
+Level 25
+
+Level 50
+
+Level 100
+
+---
+
+Map:
+
+Complete 1 map
+
+Complete 5 maps
+
+Complete 10 maps
+
+Complete 20 maps
+
+---
+
+Population:
+
+100 fish
+
+500 fish
+
+1,000 fish
+
+10,000 total fish born
+
+---
+
+Beauty:
+
+1,000 Beauty
+
+10,000 Beauty
+
+100,000 Beauty
+
+---
+
+Feeding:
+
+Feed 100 times
+
+Feed 1,000 times
+
+Feed 10,000 times
+
+---
+
+Research:
+
+10 nodes
+
+25 nodes
+
+50 nodes
+
+100 nodes
+
+---
+
+# 38. MILESTONE REWARDS
+
+Milestones should provide meaningful rewards.
+
+Possible rewards:
+
+- Gems
+- Research Points
+- Special decorations
+- Permanent bonuses
+- Rare fish
+- Rare creature
+- Aquarium expansion
+- Additional fish capacity
+- Additional food capacity
+- Additional breeding capacity
+- Map-specific upgrade tokens
+
+Avoid giving only Coins.
+
+Milestones should feel important.
+
+---
+
+# 39. GLOBAL MILESTONE BONUSES
+
+Some achievements should unlock:
+
+**GLOBAL PERMANENT BONUSES**
+
+Examples:
+
+100 species discovered:
+
++5% Fish Growth
+
+500 fish born:
+
++5% Breeding Efficiency
+
+10 maps completed:
+
++5% Offline Efficiency
+
+20 maps completed:
+
++10% Rare Discovery
+
+1,000 feedings:
+
++5% Food Efficiency
+
+These bonuses apply globally.
+
+However:
+
+Do NOT allow global bonuses to completely invalidate local map progression.
+
+Keep them moderate.
+
+---
+
+# 40. RETURN TO OLD MAPS
+
+One of the most important features:
+
+When the player unlocks later maps:
+
+Old maps must remain relevant.
+
+Example:
+
+Player has unlocked:
+
+Ocean
+
+but returns to:
+
+Pond.
+
+The player can now use newly unlocked systems to improve the Pond.
+
+Examples:
+
+- increase fish capacity
+- add new decorations
+- add rare variants
+- add better auto feeder
+- add new species
+- increase food storage
+- increase aquarium size
+- increase breeding efficiency
+
+This creates:
+
+**RETROACTIVE PROGRESSION.**
+
+---
+
+# 41. MILESTONE UNLOCKED RETROACTIVE UPGRADES
+
+Example:
+
+Achievement:
+
+"Discover 100 Species"
+
+Reward:
+
+Unlock:
+
+**Pond Expansion II**
+
+The player returns to Pond.
+
+New upgrade becomes available:
+
+Fish Capacity:
+
+50
+
+→
+
+75
+
+Then:
+
+100
+
+This makes old maps feel alive again.
+
+---
+
+# 42. MAP PRESTIGE WITHOUT RESET
+
+Do NOT reset the player's map.
+
+Instead:
+
+Old maps can gain:
+
+**Mastery Levels**
+
+Example:
+
+Pond:
+
+Mastery 1
+
+↓
+
+Mastery 2
+
+↓
+
+Mastery 3
+
+↓
+
+Mastery 10
+
+Each mastery level unlocks:
+
+- additional fish slots
+- additional decoration slots
+- higher food capacity
+- improved auto feeder
+- special fish
+- rare color variants
+- exclusive decorations
+
+No progress should be deleted.
+
+---
+
+# 43. MAP MASTERY REWARDS
+
+Example:
+
+Pond Mastery 5:
+
++10 Fish Capacity
+
+Pond Mastery 10:
+
+Unlock Golden Koi variant
+
+Pond Mastery 15:
+
+Unlock Pond Expansion
+
+Pond Mastery 20:
+
+Unlock Legendary Pond Decoration
+
+This gives players a reason to return.
+
+---
+
+# 44. MAP COMPLETION REWARD
+
+When all species in a map are discovered:
+
+Example:
+
+Pond:
+
+25 / 25 Fish
+
+5 / 5 Creatures
+
+100%
+
+Reward:
+
+**POND MASTER**
+
+Unlock:
+
+Special decoration
+
++
+
+Permanent local bonus
+
++
+
+Map badge
+
++
+
+Rare variant chance
+
+---
+
+# 45. MAP COMPLETION TIERS
+
+Use:
+
+25%
+
+50%
+
+75%
+
+90%
+
+100%
+
+Each milestone provides rewards.
+
+Example:
+
+25%:
+
+Coins
+
+50%:
+
+Research
+
+75%:
+
+Decoration
+
+90%:
+
+Rare creature
+
+100%:
+
+Legendary variant
+
+---
+
+# 46. LONG-TERM LOOP
+
+The long-term loop becomes:
+
+DISCOVER MAP
+
+↓
+
+COLLECT SPECIES
+
+↓
+
+BUILD ECOSYSTEM
+
+↓
+
+GROW FISH
+
+↓
+
+BREED
+
+↓
+
+AUTOMATE FEEDING
+
+↓
+
+COMPLETE ENCYCLOPEDIA
+
+↓
+
+REACH MILESTONE
+
+↓
+
+UNLOCK RETROACTIVE UPGRADE
+
+↓
+
+RETURN TO OLD MAP
+
+↓
+
+INCREASE CAPACITY
+
+↓
+
+DISCOVER RARE VARIANTS
+
+↓
+
+UNLOCK NEXT MAP
+
+↓
+
+REPEAT
+
+This should prevent the game from becoming content-complete after a few hours.
+
+---
+
+# 47. ANTI-INFLATION
+
+Do NOT solve long-term progression by simply increasing prices.
+
+Use multiple progression sinks:
+
+- Food
+- Food Storage
+- Auto Feeder
+- Aquarium Capacity
+- Fish Capacity
+- Space
+- Water Quality
+- Oxygen
+- Breeding
+- Map Mastery
+- Research
+- Collection
+- Milestones
+- Decorations
+- Specialists
+- Rare Variants
+- Map Expansion
+
+The player should always have meaningful goals.
+
+---
+
+# 48. FEEDING + IDLE BALANCE
+
+The game should satisfy:
+
+### ACTIVE PLAYER
+
+Can:
+
+- manually feed
+- increase growth
+- increase happiness
+- improve breeding
+- optimize fish population
+
+### IDLE PLAYER
+
+Can:
+
+- auto feed
+- maintain fish
+- generate income
+- grow fish
+- progress offline
+
+Therefore:
+
+Active play should be:
+
+**MORE EFFICIENT**
+
+Idle play should be:
+
+**MORE CONVENIENT**
+
+Never make idle play completely useless.
+
+Never make active play mandatory.
+
+---
+
+# 49. OFFLINE FEEDING
+
+When the player is offline:
+
+Calculate:
+
+Food Consumption
+
+based on:
+
+- fish population
+- fish size
+- metabolism
+- offline duration
+
+Then calculate:
+
+Auto Feeder Capacity
+
+If sufficient food:
+
+Fish remain healthy.
+
+If insufficient:
+
+Hunger decreases.
+
+If food reaches zero:
+
+Fish gradually become hungry.
+
+This means offline progression has consequences.
+
+However:
+
+Do NOT kill large numbers of fish during a normal offline session.
+
+Use a protection mechanism:
+
+- warning
+- grace period
+- starvation timer
+- maximum offline starvation penalty
+
+The player should not return to a completely destroyed aquarium because they were away overnight.
+
+---
+
+# 50. OFFLINE SUMMARY
+
+When returning:
+
+Show:
+
+WELCOME BACK!
+
+Your aquarium continued while you were away.
+
+Food Used:
+
+-1,250
+
+Fish Fed:
+
+48
+
+Fish Growth:
+
++12%
+
+Fish Born:
+
++3
+
+Coins:
+
++18,500
+
+Water Quality:
+
+94%
+
+Then:
+
+"Everything is healthy!"
+
+or:
+
+"Some fish need attention."
+
+This makes offline progression understandable.
+
+---
+
+# 51. DEBUG SYSTEM
+
+Developer tools must support:
+
+- Add Food
+- Remove Food
+- Set Hunger
+- Kill Fish
+- Grow Fish
+- Trigger Breeding
+- Spawn Creature
+- Add Coins
+- Add Gems
+- Add Research
+- Upgrade Auto Feeder
+- Upgrade Food Storage
+- Unlock Map
+- Complete Encyclopedia
+- Complete Milestone
+- Increase Map Mastery
+- Trigger Offline Simulation
+
+This is REQUIRED for testing.
+
+---
+
+# 52. DATA STRUCTURE
+
+Create or extend:
+
+FishData
+
+CreatureData
+
+FoodData
+
+FoodRequirementData
+
+FeedingUpgradeData
+
+AutoFeederData
+
+AquariumCapacityData
+
+MapData
+
+MapSpeciesData
+
+EncyclopediaData
+
+AchievementData
+
+MilestoneData
+
+MapMasteryData
+
+MapExpansionData
+
+Each must be data-driven.
+
+---
+
+# 53. TECHNICAL ARCHITECTURE
+
+Do NOT create:
+
+One giant GameManager.
+
+Separate systems:
+
+FishSystem
+
+CreatureSystem
+
+FeedingSystem
+
+FoodSystem
+
+AutoFeederSystem
+
+HungerSystem
+
+GrowthSystem
+
+BreedingSystem
+
+EcosystemSystem
+
+MapSystem
+
+MapMasterySystem
+
+EncyclopediaSystem
+
+AchievementSystem
+
+MilestoneSystem
+
+EconomySystem
+
+ResearchSystem
+
+SaveSystem
+
+LocalizationSystem
+
+UI System
+
+Use clear interfaces where appropriate.
+
+---
+
+# 54. PERFORMANCE
+
+Do NOT simulate every fish independently at full frequency.
+
+Use:
+
+Centralized simulation.
+
+Visual movement:
+
+High frequency.
+
+Hunger:
+
+Low frequency.
+
+Food consumption:
+
+Low frequency.
+
+Breeding:
+
+Low frequency.
+
+Ecosystem:
+
+1–5 calculations per second.
+
+Offline:
+
+Mathematical simulation.
+
+Large maps:
+
+Use simulation LOD.
+
+This must remain mobile-friendly.
+
+---
+
+# 55. FINAL DESIGN TARGET
+
+The player should feel:
+
+"My aquarium is alive."
+
+Then:
+
+"I need to feed my fish."
+
+Then:
+
+"I should automate feeding."
+
+Then:
+
+"I want more fish."
+
+Then:
+
+"I want to discover every species."
+
+Then:
+
+"I want to complete this map."
+
+Then:
+
+"I unlocked a milestone!"
+
+Then:
+
+"I can go back to my old Pond and make it even bigger."
+
+Then:
+
+"I wonder what's in the next ocean."
+
+The game should continuously create:
+
+**SHORT-TERM GOALS**
+
+through:
+
+feeding
+
+collecting
+
+upgrading
+
+breeding
+
+and
+
+**LONG-TERM GOALS**
+
+through:
+
+encyclopedia
+
+milestones
+
+map mastery
+
+rare species
+
+20+ maps
+
+global research
+
+and retroactive upgrades.
+
+---
+
+# IMPLEMENTATION ORDER
+
+Implement these features in this order:
+
+### PHASE 1
+
+Food resource
+
++
+
+Hunger
+
++
+
+Manual Feeding
+
+---
+
+### PHASE 2
+
+Food Storage Upgrade
+
++
+
+Food Production
+
+---
+
+### PHASE 3
+
+Auto Feeder
+
++
+
+Auto Feeder Upgrade
+
+---
+
+### PHASE 4
+
+Starvation / Fish Death
+
++
+
+Warning System
+
+---
+
+### PHASE 5
+
+Large Creature System
+
++
+
+Ray
+
++
+
+Shark
+
++
+
+Turtle
+
++
+
+Jellyfish
+
+---
+
+### PHASE 6
+
+Aquarium Encyclopedia
+
++
+
+Map Species Index
+
+---
+
+### PHASE 7
+
+20 Map Architecture
+
+Do NOT create all 20 maps immediately.
+
+First create:
+
+3 fully functional maps
+
+Then scale the architecture.
+
+---
+
+### PHASE 8
+
+Achievement System
+
++
+
+Milestones
+
+---
+
+### PHASE 9
+
+Map Mastery
+
++
+
+Retroactive Upgrades
+
+---
+
+### PHASE 10
+
+Long-term balancing
+
++
+
+Anti-inflation
+
++
+
+Offline balancing
+
++
+
+Performance optimization
+
+---
+
+# CRITICAL REQUIREMENT
+
+Do NOT only implement the visible UI.
+
+Every new mechanic must work with:
+
+- Save System
+- Offline System
+- Economy
+- Localization
+- Tutorial
+- Analytics
+- Data-driven content
+- Mobile performance
+
+The final architecture must support:
+
+20+ maps
+
+500+ fish entries
+
+100+ creature entries
+
+hundreds of decorations
+
+hundreds of achievements/milestones
+
+without requiring major code rewrites.

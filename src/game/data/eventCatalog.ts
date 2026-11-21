@@ -1,0 +1,63 @@
+import { EventThemeData } from '../core/types';
+
+/**
+ * Rotating Weekly Challenges & Limited-Time Event Aquariums
+ */
+export const EVENT_CATALOG: EventThemeData[] = [
+  {
+    id: 'weekly_schooling',
+    name: 'Schooling Week',
+    type: 'weekly',
+    description: 'Build a thriving synchronized fish school of 6 or more fish in any map.',
+    objectiveText: 'Reach 6 swimming fish in your active aquarium',
+    target: 6,
+    active: true,
+    limitedFishIds: ['neon_tetra', 'lake_neon', 'cardinal_tetra'],
+    limitedDecorationIds: ['lotus_lily'],
+    currencyName: 'Shoal Medals',
+    rewardLabel: '+1,800 Coins · +40 RP · +15 Gems',
+    accentColor: '#7be3d4',
+  },
+  {
+    id: 'weekly_clean_water',
+    name: 'Clean Water Week',
+    type: 'weekly',
+    description: 'Balance filters, plants, and snails to keep water clarity above 90%.',
+    objectiveText: 'Maintain Perfect Water Quality',
+    target: 90,
+    active: false,
+    limitedFishIds: [],
+    limitedDecorationIds: ['sponge_filter', 'reef_light'],
+    currencyName: 'Crystal Drops',
+    rewardLabel: '+2,400 Coins · +50 RP',
+    accentColor: '#8ad8ff',
+  },
+  {
+    id: 'weekly_breeding',
+    name: 'Breeding Week',
+    type: 'weekly',
+    description: 'Raise healthy Breeding Adults and hatch baby fish into your schools.',
+    objectiveText: 'Hatch 3 baby fish',
+    target: 3,
+    active: false,
+    limitedFishIds: ['guppy', 'goldfish'],
+    limitedDecorationIds: ['sunken_amphora'],
+    currencyName: 'Pearl Eggs',
+    rewardLabel: 'Rare Variant Egg · +60 RP',
+    accentColor: '#ffd480',
+  },
+  {
+    id: 'limited_moonlight',
+    name: 'Moonlight Aquarium (7-Day Event)',
+    type: 'limited_aquarium',
+    description: 'A serene silver-lit event sanctuary featuring glowing Moon Jellies and Moonpearl Clams.',
+    objectiveText: 'Temporary 7-day sanctuary with permanent conservation rewards',
+    target: 10,
+    active: false,
+    limitedFishIds: ['moon_jellyfish', 'seahorse'],
+    limitedDecorationIds: ['pearl_clam', 'quartz_cluster'],
+    currencyName: 'Moon Pearls',
+    rewardLabel: 'Permanent +5% Variant Chance',
+    accentColor: '#b5c7ff',
+  },
+];

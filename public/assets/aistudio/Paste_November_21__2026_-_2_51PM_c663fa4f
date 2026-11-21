@@ -1,0 +1,3139 @@
+# AQUARIUM IDLE TYCOON – MAJOR GAMEPLAY EXPANSION
+## EXTENSION PROMPT FOR EXISTING GOOGLE AI STUDIO PROJECT
+
+You are continuing development of an existing **Pixel Art Idle Aquarium Tycoon mobile game project**.
+
+IMPORTANT:
+
+Do NOT rebuild the project from scratch.
+
+Do NOT replace the existing architecture unnecessarily.
+
+Do NOT remove existing systems that already work.
+
+Extend the current project while preserving existing:
+- core gameplay
+- save system
+- economy
+- fish collection
+- aquarium system
+- decoration system
+- offline progression
+- UI navigation
+- existing data structures where possible
+
+Before implementing anything, inspect the current project architecture and identify:
+1. Existing systems that can be reused.
+2. Existing systems that need extension.
+3. Existing systems that need refactoring.
+4. Potential conflicts between old and new systems.
+5. New data structures required.
+
+The goal is to transform the existing game from a simple Idle Aquarium into a deeper:
+
+**PIXEL ART AQUARIUM ECOSYSTEM IDLE TYCOON**
+
+The game should feel like a combination of:
+
+- Cozy Aquarium Collection
+- Idle Tycoon
+- Aquarium Management
+- Creature Collection
+- Ecosystem Simulation
+- Decoration / Customization
+- Long-term Research Progression
+
+The game must remain accessible to casual mobile players.
+
+---
+
+# 1. NEW CORE DESIGN PHILOSOPHY
+
+The aquarium is no longer simply a container for fish.
+
+Every aquarium should feel like a:
+
+**LIVING ECOSYSTEM.**
+
+The player should gradually create a healthy ecosystem by balancing:
+
+- Fish
+- Population
+- Oxygen
+- Water quality
+- Plants
+- Shelter
+- Decoration
+- Food
+- Space
+- Temperature
+- Habitat requirements
+
+The player should be able to look at the aquarium and visually understand that it is alive.
+
+Fish should:
+- swim
+- form groups
+- hide
+- chase food
+- rest
+- reproduce
+- grow
+- interact with decorations
+- react to ecosystem conditions
+- change swimming behavior depending on environment
+
+Do NOT make the simulation overly complicated.
+
+The player should understand the system intuitively through visual feedback.
+
+---
+
+# 2. WORLD MAP PROGRESSION
+
+Replace the simple aquarium progression with a larger world map.
+
+The player gradually travels from small freshwater environments toward the open ocean.
+
+Recommended progression:
+
+## MAP 01 – LITTLE POND
+
+Theme:
+- small peaceful backyard pond
+- freshwater plants
+- rocks
+- lily pads
+- small fish
+
+Atmosphere:
+- cozy
+- relaxing
+- beginner-friendly
+
+Fish:
+25 species
+
+Example categories:
+- small schooling fish
+- tiny solitary fish
+- bottom feeders
+- surface fish
+
+---
+
+# MAP 02 – FOREST LAKE
+
+Theme:
+- larger freshwater lake
+- deeper water
+- underwater vegetation
+- logs
+- stones
+- aquatic plants
+
+Fish:
+25 unique species
+
+Introduce:
+- deeper swimming zones
+- larger fish
+- predator/prey relationship
+- schooling behavior
+
+---
+
+# MAP 03 – RIVER
+
+Theme:
+- flowing freshwater
+- rocks
+- driftwood
+- aquatic plants
+- stronger water movement
+
+Fish:
+25 unique species
+
+New gameplay:
+- current direction
+- fish swimming against current
+- fish preferring different water zones
+- river-specific decorations
+
+---
+
+# MAP 04 – WETLAND
+
+Theme:
+- swamp
+- reeds
+- mud
+- shallow water
+- roots
+- floating plants
+
+Fish:
+25 unique species
+
+New gameplay:
+- hiding
+- vegetation density
+- muddy water
+- water purification mechanics
+
+---
+
+# MAP 05 – MANGROVE
+
+Theme:
+- mangrove roots
+- brackish water
+- shallow coastal ecosystem
+- small crabs
+- shrimp
+- shellfish
+
+Fish:
+25 unique species
+
+New creatures:
+- crab
+- shrimp
+- snail
+- shellfish
+
+These creatures should provide different gameplay bonuses.
+
+---
+
+# MAP 06 – CORAL REEF
+
+Theme:
+- tropical coral reef
+- colorful fish
+- coral
+- anemones
+- shells
+
+Fish:
+25 unique species
+
+This should be the strongest visual progression.
+
+Introduce:
+- extremely colorful fish
+- large schools
+- coral interaction
+- rare fish discovery
+
+---
+
+# MAP 07 – OPEN OCEAN
+
+Theme:
+- huge open-water environment
+- deep blue water
+- large schools
+- larger creatures
+
+Fish:
+25 unique species
+
+Introduce:
+- large fish
+- predator fish
+- migrating schools
+- wider swimming space
+
+---
+
+# MAP 08 – DEEP OCEAN
+
+Theme:
+- dark blue/deep ocean
+- mysterious creatures
+- bioluminescence
+- rare species
+
+Fish:
+25 unique species
+
+Introduce:
+- legendary fish
+- deep-sea creatures
+- bioluminescent decorations
+- extremely rare discoveries
+
+---
+
+# 3. MAP IDENTITY
+
+Every map must have its own:
+
+- visual identity
+- water color
+- background
+- music
+- fish pool
+- decorations
+- ambient effects
+- creature types
+- ecosystem requirements
+- progression
+- research tree
+- economy
+
+Do NOT make every map feel like the same aquarium with a different background.
+
+Each map should answer:
+
+"What makes this ecosystem different?"
+
+---
+
+# 4. FISH DATABASE EXPANSION
+
+Each map contains:
+
+**25 unique fish species.**
+
+Fish should be strongly differentiated.
+
+Each FishData should support:
+
+- id
+- speciesName
+- scientificName
+- rarity
+- habitat
+- preferredTemperature
+- preferredWaterQuality
+- preferredOxygen
+- preferredDepth
+- dietType
+- growthTime
+- adultSize
+- movementSpeed
+- swimmingPattern
+- schoolingBehavior
+- minimumSchoolSize
+- maximumSchoolSize
+- aggression
+- predatorLevel
+- preyLevel
+- reproductionRequirement
+- reproductionCooldown
+- reproductionRate
+- eggDuration
+- babyGrowthDuration
+- income
+- beautyScore
+- spaceRequirement
+- foodRequirement
+- oxygenRequirement
+- shelterRequirement
+- preferredDecorations
+- spriteSet
+- animationSet
+
+---
+
+# 5. FISH SCHOOLING SYSTEM
+
+Implement different social behavior.
+
+Fish categories:
+
+### SOLITARY
+
+Fish prefer to swim alone.
+
+Examples:
+- Betta-like fish
+- territorial fish
+- certain predators
+
+Do not force solitary fish into schools.
+
+---
+
+### SMALL SCHOOL
+
+Require approximately:
+
+2–4 fish
+
+Behavior:
+- loosely follow each other
+- occasionally separate
+- regroup
+
+---
+
+### MEDIUM SCHOOL
+
+Require approximately:
+
+5–8 fish
+
+Behavior:
+- coordinated movement
+- synchronized direction changes
+- visually beautiful group formations
+
+---
+
+### LARGE SCHOOL
+
+Require approximately:
+
+9–15 fish
+
+Behavior:
+- large coordinated formations
+- synchronized turning
+- dynamic school movement
+
+---
+
+### MASS SCHOOL
+
+Require:
+
+16+ fish
+
+Used for:
+- tiny schooling fish
+- sardine-like fish
+- neon-tetra-like fish
+
+These fish should create spectacular visual movement.
+
+IMPORTANT:
+
+If a schooling species is below its minimum required school size, do not instantly kill the fish.
+
+Instead use progressive ecosystem penalties:
+
+Stage 1:
+- fish becomes less active
+
+Stage 2:
+- fish becomes stressed
+
+Stage 3:
+- movement becomes slower
+
+Stage 4:
+- happiness decreases
+
+Stage 5:
+- health decreases
+
+Stage 6:
+- disease/death risk increases
+
+This should create a meaningful reason to maintain proper population.
+
+The player should receive clear visual feedback before fish die.
+
+---
+
+# 6. FISH COMPATIBILITY SYSTEM
+
+Fish should have compatibility relationships.
+
+Create:
+
+FishCompatibilityData
+
+Possible relationships:
+
+- Compatible
+- Neutral
+- Territorial
+- Predator
+- Prey
+- Dangerous
+- Symbiotic
+
+Example:
+
+Large predator + small fish
+
+can create:
+
+**Predation Risk**
+
+If the player places incompatible species together, small fish may disappear.
+
+However, avoid making fish randomly disappear without explanation.
+
+Before predation occurs:
+
+- warning notification
+- fish behavior changes
+- hiding behavior
+- predator behavior
+- ecosystem warning
+
+The player should understand:
+
+"Something is wrong."
+
+---
+
+# 7. FISH GROWTH SYSTEM
+
+Fish are NOT immediately adult-sized.
+
+When first obtained:
+
+**BABY**
+
+Then:
+
+**JUVENILE**
+
+Then:
+
+**ADULT**
+
+Then potentially:
+
+**BREEDING ADULT**
+
+Growth should happen over real gameplay time.
+
+Example:
+
+Baby:
+- small body
+- slower movement
+- lower income
+- lower beauty
+
+Juvenile:
+- medium body
+- faster movement
+- increased income
+
+Adult:
+- full appearance
+- full income
+- full beauty
+
+Breeding Adult:
+- can reproduce
+
+Growth should be visually obvious.
+
+The player should be able to see:
+
+"That fish I placed yesterday has grown."
+
+---
+
+# 8. BREEDING SYSTEM
+
+Adult fish can reproduce when all required conditions are satisfied.
+
+Requirements may include:
+
+- minimum age
+- sufficient food
+- sufficient oxygen
+- good water quality
+- enough space
+- correct temperature
+- suitable habitat
+- sufficient school size
+- compatible mate
+- sufficient shelter
+
+When reproduction happens:
+
+Fish enter a breeding behavior.
+
+Then:
+
+EGGS
+
+→
+
+BABY FISH
+
+→
+
+JUVENILE
+
+→
+
+ADULT
+
+The new fish should automatically join its species school.
+
+This creates a satisfying:
+
+**"My aquarium is creating life."**
+
+moment.
+
+---
+
+# 9. NATURAL SCHOOLING
+
+Fish of the same species should naturally prefer to swim together.
+
+Implement:
+
+- flocking
+- cohesion
+- separation
+- alignment
+
+But simplify the simulation for mobile performance.
+
+The player should visually perceive:
+
+**"These fish belong together."**
+
+School formations should occasionally:
+
+- turn together
+- split
+- regroup
+- circle
+- accelerate
+- slow down
+
+Avoid robotic movement.
+
+---
+
+# 10. PIXEL ART FISH ANIMATION
+
+Upgrade the visual quality of fish.
+
+Fish should NOT use stiff horizontal movement.
+
+Fish bodies should have:
+
+- flexible body motion
+- long flowing fins
+- long flowing tails
+- subtle body wave
+- smooth tail movement
+- elegant swimming animation
+
+The visual target is:
+
+**relaxing underwater movement.**
+
+Small fish:
+
+- fast
+- energetic
+- short movement cycles
+
+Large fish:
+
+- slow
+- graceful
+- powerful
+
+Long-fin fish:
+
+- flowing
+- elegant
+- slow
+
+Jellyfish:
+
+- pulsing movement
+
+Seahorse-like fish:
+
+- vertical movement
+
+Ray-like creatures:
+
+- wing-like swimming
+
+Each species should have a recognizable swimming style.
+
+---
+
+# 11. FISH MOVEMENT BOUNDARIES
+
+Fish must be able to move naturally inside the aquarium.
+
+The aquarium should support different sizes.
+
+The movement system must calculate:
+
+- aquarium width
+- aquarium height
+- water area
+- fish size
+- fish collision radius
+- safe movement boundaries
+
+Fish must NEVER leave the aquarium.
+
+If the aquarium size changes:
+
+the swimming area automatically recalculates.
+
+Support:
+
+- small aquarium
+- medium aquarium
+- large aquarium
+- expanded aquarium
+
+Do NOT hardcode movement boundaries.
+
+---
+
+# 12. AQUARIUM CAPACITY
+
+Expand the aquarium capacity system.
+
+The player can gradually increase active fish capacity.
+
+Recommended progression:
+
+10 species
+→
+15
+→
+20
+→
+25
+→
+30
+→
+35
+→
+40
+→
+45
+→
+50 active species
+
+Maximum:
+
+**50 active fish species per aquarium.**
+
+Important distinction:
+
+The player's global collection should NOT be limited to 50.
+
+The player can collect more species globally.
+
+Only the active aquarium capacity is limited.
+
+This creates a strategic decision:
+
+"What species should I put into this aquarium?"
+
+---
+
+# 13. MAP-SPECIFIC DECORATIONS
+
+Each map gets its own decoration pool.
+
+Decoration must NOT be purely cosmetic.
+
+Every decoration should have gameplay value.
+
+Examples:
+
+### AQUATIC PLANT
+
+Effect:
+- improves water filtration
+- increases water quality
+
+---
+
+### AIR STONE
+
+Effect:
+- increases oxygen
+- increases fish movement speed
+- increases fish activity
+
+---
+
+### SMALL BUSH
+
+Effect:
+- provides hiding space
+- reduces predator attack probability
+- increases fish safety
+
+---
+
+### LARGE ROCK
+
+Effect:
+- creates territory
+- provides shelter
+- increases habitat beauty
+
+---
+
+### DRIFTWOOD
+
+Effect:
+- increases shelter
+- improves habitat score
+
+---
+
+### CORAL
+
+Effect:
+- increases beauty
+- provides habitat for small fish
+
+---
+
+### FILTER
+
+Effect:
+- removes pollution
+- maintains water clarity
+
+---
+
+### WATER PUMP
+
+Effect:
+- improves circulation
+- distributes oxygen
+
+---
+
+### HEATER
+
+Effect:
+- maintains tropical water temperature
+
+---
+
+### CHILLER
+
+Effect:
+- maintains cold-water temperature
+
+---
+
+### LIGHT
+
+Effect:
+- increases beauty
+- improves visibility
+
+---
+
+# 14. WATER QUALITY SYSTEM
+
+Introduce a visual water quality system.
+
+Water quality has several states:
+
+### PERFECT
+
+Clear water.
+
+Fish are highly visible.
+
+---
+
+### GOOD
+
+Slightly less clear.
+
+---
+
+### DIRTY
+
+Water begins to become cloudy.
+
+---
+
+### VERY DIRTY
+
+Visibility is significantly reduced.
+
+---
+
+### POLLUTED
+
+Strong visual effect.
+
+Fish become stressed.
+
+---
+
+Water quality should gradually decrease based on:
+
+- fish population
+- waste
+- lack of filtration
+- lack of plants
+- insufficient water circulation
+
+Players must build the correct ecosystem.
+
+---
+
+# 15. ALGAE SYSTEM
+
+If the aquarium lacks filtration and maintenance:
+
+algae gradually grows.
+
+Visual progression:
+
+Clean glass
+
+→
+
+small algae spots
+
+→
+
+larger algae
+
+→
+
+dirty glass
+
+→
+
+heavy algae
+
+→
+
+poor visibility
+
+Do NOT simply show a "Water Quality -20%" number.
+
+Show the consequence visually.
+
+The player should think:
+
+"I need another filter."
+
+This is a key visual feedback mechanic.
+
+---
+
+# 16. OXYGEN SYSTEM
+
+Introduce oxygen as an ecosystem resource.
+
+Oxygen changes based on:
+
+- fish population
+- fish size
+- plants
+- air stones
+- pumps
+- water circulation
+
+Low oxygen causes:
+
+- fish movement slows
+- fish become stressed
+- fish stay closer to oxygen sources
+- breeding efficiency decreases
+- health decreases
+
+Good oxygen causes:
+
+- active swimming
+- faster movement
+- healthier fish
+- better breeding
+- better beauty
+
+---
+
+# 17. SPACE SYSTEM
+
+Every fish consumes a certain amount of space.
+
+Example:
+
+Tiny fish:
+0.2 space
+
+Small fish:
+0.5 space
+
+Medium fish:
+1 space
+
+Large fish:
+3 space
+
+Huge fish:
+6 space
+
+The aquarium has:
+
+**Maximum Space Capacity**
+
+This creates a second meaningful limitation beyond species count.
+
+---
+
+# 18. FISH INCOME
+
+Fish should not be the only source of money.
+
+Fish generate passive income.
+
+But income should depend on:
+
+- health
+- adult stage
+- beauty
+- rarity
+- ecosystem quality
+- happiness
+
+Healthy fish:
+
+100% production
+
+Stressed fish:
+
+70%
+
+Very stressed:
+
+40%
+
+Sick:
+
+10%
+
+Dead:
+
+0%
+
+This makes ecosystem management economically meaningful.
+
+---
+
+# 19. IMPORTANT ECONOMY CHANGE
+
+Remove the feeling that:
+
+**"Money simply appears infinitely from nowhere."**
+
+The early game should require the player to actively build a small income ecosystem.
+
+At the beginning:
+
+The player receives a small aquarium.
+
+The player needs to discover and unlock small income creatures.
+
+Examples:
+
+- Crab
+- Snail
+- Shrimp
+- Clam
+- Mussel
+- Small octopus
+- Squid
+- Sea cucumber
+
+These creatures should differ by map.
+
+---
+
+# 20. CREATURE INCOME SYSTEM
+
+Each creature has a different income mechanic.
+
+Example:
+
+### CRAB
+
+Produces:
+
+Shell Coins
+
+Behavior:
+- walks sideways
+- hides under rocks
+
+---
+
+### SNAIL
+
+Produces:
+
+Slow passive income
+
+Special:
+
+Consumes algae.
+
+Therefore:
+
+Snail = income + water maintenance
+
+---
+
+### SHRIMP
+
+Produces:
+
+small frequent income
+
+Special:
+
+helps clean the aquarium.
+
+---
+
+### CLAM
+
+Produces:
+
+slow but high-value income.
+
+---
+
+### OCTOPUS
+
+Produces:
+
+high income.
+
+Special:
+
+requires advanced habitat.
+
+---
+
+### SQUID
+
+Produces:
+
+high income during active periods.
+
+Special:
+
+requires large swimming space.
+
+---
+
+# 21. INCOME CHAIN
+
+Instead of:
+
+Fish → Money
+
+Use:
+
+Ecosystem → Production → Collection → Upgrade
+
+Example:
+
+Crab
+
+→
+
+Collect Shell Coins
+
+→
+
+Upgrade Aquarium
+
+→
+
+Unlock Fish
+
+→
+
+Fish Grow
+
+→
+
+Fish Breed
+
+→
+
+Population increases
+
+→
+
+Aquarium Beauty increases
+
+→
+
+Unlock new species
+
+→
+
+Unlock new habitat
+
+This creates a more meaningful economy.
+
+---
+
+# 22. ACTIVE COLLECTION
+
+Income creatures should have visible collection points.
+
+For example:
+
+Crab walks around the bottom.
+
+After some time:
+
+A floating coin appears.
+
+Player taps it.
+
+Coin flies toward the wallet.
+
+Use:
+
+- bounce
+- particles
+- sound
+- coin trail
+- floating number
+
+This creates the satisfying:
+
+**CASINO EFFECT**
+
+without requiring constant tapping.
+
+Important:
+
+Do not make the game a clicker.
+
+Collection should be optional and eventually automated.
+
+---
+
+# 23. AUTOMATION
+
+Introduce automation progressively.
+
+Early game:
+
+Player manually collects.
+
+Mid game:
+
+Unlock:
+
+**Auto Collector**
+
+Late game:
+
+Unlock:
+
+**Ecosystem Manager**
+
+End game:
+
+All income collection becomes automatic.
+
+This follows the classic idle tycoon principle:
+
+Manual → Assisted → Automated.
+
+---
+
+# 24. MAP-SPECIFIC ECONOMY
+
+Each map should have its own income ecosystem.
+
+Example:
+
+Pond:
+- snail
+- freshwater crab
+- freshwater shrimp
+
+Lake:
+- crayfish
+- mussel
+- lake snail
+
+River:
+- river shrimp
+- freshwater crab
+
+Mangrove:
+- mud crab
+- shrimp
+- shellfish
+
+Coral:
+- cleaner shrimp
+- sea snail
+- clam
+
+Ocean:
+- squid
+- crab
+- shellfish
+
+Deep Ocean:
+- deep sea shrimp
+- squid
+- rare creatures
+
+Each map should feel economically different.
+
+---
+
+# 25. LOCAL MAP UPGRADES
+
+VERY IMPORTANT:
+
+Upgrading Map A must ONLY upgrade Map A.
+
+Do NOT automatically upgrade all maps.
+
+Each map has independent:
+
+- aquarium level
+- capacity
+- oxygen system
+- filtration
+- income
+- decoration slots
+- water quality
+- creature collection
+- research bonuses
+- habitat upgrades
+
+Example:
+
+Pond Level 20
+
+does NOT mean:
+
+Lake Level 20.
+
+Lake remains at its own level.
+
+This gives players reasons to revisit older maps.
+
+---
+
+# 26. MAP SPECIALIZATION
+
+Each map should have unique strategic strengths.
+
+Example:
+
+Pond:
+
++ Fish breeding
+
+Lake:
+
++ Fish growth
+
+River:
+
++ Income speed
+
+Wetland:
+
++ Water purification
+
+Mangrove:
+
++ Creature income
+
+Coral Reef:
+
++ Beauty
+
+Open Ocean:
+
++ Rare fish discovery
+
+Deep Ocean:
+
++ Legendary fish discovery
+
+This creates meaningful map identity.
+
+---
+
+# 27. MAP PROGRESSION
+
+Use a gradual progression:
+
+Pond
+
+↓
+
+Lake
+
+↓
+
+River
+
+↓
+
+Wetland
+
+↓
+
+Mangrove
+
+↓
+
+Coral Reef
+
+↓
+
+Open Ocean
+
+↓
+
+Deep Ocean
+
+Each new map should introduce:
+
+- new mechanics
+- new species
+- new decorations
+- new creature
+- new currency/resource
+- new research
+- new visual style
+
+---
+
+# 28. RESEARCH SYSTEM
+
+Add a permanent:
+
+**AQUARIUM RESEARCH CENTER**
+
+This is one of the major long-term progression systems.
+
+Research categories:
+
+### BIOLOGY
+
+- faster fish growth
+- faster breeding
+- higher egg survival
+- larger schools
+
+### WATER SCIENCE
+
+- better filtration
+- slower pollution
+- better oxygen efficiency
+- slower algae growth
+
+### AQUACULTURE
+
+- better fish income
+- better breeding
+- better fish health
+
+### DECORATION
+
+- stronger decoration effects
+- increased beauty
+
+### EXPLORATION
+
+- rare fish discovery
+- hidden species
+- better event rewards
+
+### AUTOMATION
+
+- auto collector
+- faster collection
+- offline efficiency
+- automated maintenance
+
+---
+
+# 29. RESEARCH CURRENCY
+
+Do NOT use normal coins for everything.
+
+Introduce:
+
+**Research Points**
+
+Earned from:
+
+- discoveries
+- collection milestones
+- research missions
+- breeding milestones
+- map completion
+- special events
+
+This prevents normal currency from becoming the only progression system.
+
+---
+
+# 30. MULTI-LAYER PROGRESSION
+
+The game should have multiple progression layers.
+
+### Layer 1 – NORMAL MONEY
+
+Used for:
+
+- basic upgrades
+- decorations
+- fish
+- creatures
+
+---
+
+### Layer 2 – GEMS
+
+Used for:
+
+- premium items
+- optional boosts
+- rare convenience
+
+---
+
+### Layer 3 – RESEARCH POINTS
+
+Used for:
+
+- permanent research
+
+---
+
+### Layer 4 – COLLECTION POINTS
+
+Earned from:
+
+- discovering fish
+- completing collections
+
+Used for:
+
+- collection rewards
+
+---
+
+### Layer 5 – MAP TOKENS
+
+Each map has its own progression token.
+
+Used only for that map.
+
+This prevents economy collapse.
+
+---
+
+# 31. ANTI-INFLATION ECONOMY
+
+The biggest problem to avoid:
+
+The player becomes rich too quickly and finishes all meaningful upgrades in 2–3 hours.
+
+Do NOT solve this simply by making prices 1,000,000x larger.
+
+Instead create multiple meaningful sinks.
+
+Money can be spent on:
+
+- aquarium expansion
+- oxygen
+- filtration
+- decorations
+- fish
+- creature upgrades
+- breeding upgrades
+- automation
+- habitat upgrades
+
+Research Points:
+
+- permanent upgrades
+
+Collection Points:
+
+- collection rewards
+
+Map Tokens:
+
+- map-specific progression
+
+Gems:
+
+- premium convenience
+
+Every currency must have a clear purpose.
+
+---
+
+# 32. BOTTLENECK SYSTEM
+
+Use the classic idle tycoon principle:
+
+Progress should be limited by a bottleneck.
+
+Possible bottlenecks:
+
+- money
+- fish capacity
+- space
+- oxygen
+- water quality
+- research
+- breeding
+- decoration
+- map level
+
+The player should frequently have a meaningful question:
+
+"What should I upgrade next?"
+
+Not:
+
+"Just buy everything."
+
+---
+
+# 33. PRODUCTION CHAIN
+
+Introduce light production-chain gameplay.
+
+Example:
+
+Plants
+
+→
+
+Water Quality
+
+→
+
+Fish Health
+
+→
+
+Fish Growth
+
+→
+
+Breeding
+
+→
+
+Population
+
+→
+
+Beauty
+
+→
+
+Income
+
+Another:
+
+Shrimp
+
+→
+
+Cleaning
+
+→
+
+Water Quality
+
+→
+
+Fish Happiness
+
+→
+
+Higher Production
+
+This makes systems interact with each other.
+
+---
+
+# 34. COLLECTION SYSTEM 2.0
+
+Expand the fish collection.
+
+Each species should have:
+
+- silhouette
+- discovered state
+- rarity
+- growth stage
+- preferred habitat
+- behavior
+- school size
+- favorite decoration
+- breeding status
+
+Collection page should show:
+
+**25 / 25 discovered**
+
+for each map.
+
+Reward:
+
+Complete 5 species
+
+→ small reward
+
+Complete 10
+
+→ decoration
+
+Complete 15
+
+→ research points
+
+Complete 20
+
+→ rare creature
+
+Complete 25
+
+→ exclusive map decoration
+
+This creates long-term collection goals.
+
+---
+
+# 35. RARE VARIANT SYSTEM
+
+If the same species appears in another map:
+
+DO NOT simply duplicate the same fish.
+
+Instead create variants.
+
+Example:
+
+Common Neon Fish
+
+↓
+
+Lake Neon Fish
+
+Different:
+
+- color
+- stripe
+- fin color
+- behavior
+- rarity
+
+This creates collection depth.
+
+---
+
+# 36. GENETIC / COLOR VARIANTS
+
+After breeding, there is a small chance of:
+
+- alternate color
+- rare pattern
+- shiny variant
+- long-fin variant
+- albino-like variant
+- special pixel variant
+
+Important:
+
+Variants should be collectible.
+
+But DO NOT make them mandatory for normal progression.
+
+They are a long-term collector goal.
+
+---
+
+# 37. BEAUTY SCORE 2.0
+
+Beauty should no longer be a simple decoration number.
+
+Calculate:
+
+Beauty Score =
+
+Fish Variety
+
++
+
+Fish Rarity
+
++
+
+Color Diversity
+
++
+
+Decoration Harmony
+
++
+
+Plant Variety
+
++
+
+Schooling Activity
+
++
+
+Water Quality
+
++
+
+Aquarium Completeness
+
++
+
+Special Creatures
+
+The aquarium should visually look better as the score increases.
+
+Beauty should unlock:
+
+- rare fish
+- visitors
+- rewards
+- special decorations
+- photography moments
+
+---
+
+# 38. AQUARIUM VISITOR SYSTEM
+
+Introduce small visitors.
+
+Examples:
+
+- child
+- aquarium enthusiast
+- marine biologist
+- photographer
+- collector
+
+Visitors appear occasionally.
+
+They react to aquarium conditions.
+
+Examples:
+
+"Wow! Look at that school!"
+
+"Your coral reef is beautiful!"
+
+"That fish is extremely rare!"
+
+This provides emotional feedback.
+
+Visitors can also provide missions.
+
+---
+
+# 39. DAILY MISSIONS
+
+Add meaningful daily missions.
+
+Examples:
+
+- Discover 1 new fish
+- Feed 10 fish
+- Improve water quality
+- Grow 3 fish
+- Breed 1 species
+- Collect 500 coins
+- Maintain oxygen above 80%
+- Add 2 decorations
+- Complete one research
+
+Do not make missions feel like chores.
+
+Rewards should include:
+
+- coins
+- research points
+- gems
+- map tokens
+- rare items
+
+---
+
+# 40. WEEKLY EVENTS
+
+Introduce rotating events.
+
+Examples:
+
+### SCHOOLING WEEK
+
+Raise the largest fish school.
+
+Reward:
+special fish.
+
+---
+
+### CLEAN WATER WEEK
+
+Maintain maximum water quality.
+
+Reward:
+special decoration.
+
+---
+
+### BREEDING WEEK
+
+Breed as many fish as possible.
+
+Reward:
+rare egg.
+
+---
+
+### DEEP SEA EVENT
+
+Discover rare deep sea creatures.
+
+Reward:
+exclusive species.
+
+---
+
+# 41. LIMITED-TIME AQUARIUM
+
+Introduce temporary event aquariums.
+
+Example:
+
+Moonlight Aquarium
+
+Available for:
+
+7 days
+
+Contains:
+
+- special fish
+- special decorations
+- special currency
+
+Progress should provide permanent rewards.
+
+This follows the event structure used by successful idle games without forcing the player to permanently grind.
+
+---
+
+# 42. LONG-TERM PRESTIGE / CONSERVATION SYSTEM
+
+Do NOT use a harsh "reset everything" prestige.
+
+Instead introduce:
+
+**OCEAN CONSERVATION PROJECT**
+
+Once the player reaches a major milestone:
+
+They can contribute resources to unlock permanent global improvements.
+
+Example:
+
+Restore a coral reef
+
+→ permanent +5% rare fish discovery
+
+Restore wetlands
+
+→ permanent +5% water efficiency
+
+Protect endangered species
+
+→ permanent +5% breeding efficiency
+
+This creates a soft prestige system.
+
+The player should feel:
+
+"I am rebuilding the world."
+
+rather than:
+
+"I lost everything."
+
+---
+
+# 43. OFFLINE PROGRESSION 2.0
+
+Offline income should consider ecosystem status.
+
+When player leaves:
+
+The aquarium continues operating.
+
+Calculate:
+
+offlineDuration
+
+×
+
+averageIncome
+
+×
+
+ecosystemEfficiency
+
+×
+
+automationBonus
+
+×
+
+researchBonus
+
+Do NOT give maximum production if the aquarium was poorly maintained.
+
+Example:
+
+Healthy aquarium:
+
+100% offline efficiency
+
+Poor aquarium:
+
+70%
+
+Very poor aquarium:
+
+40%
+
+This makes ecosystem management meaningful.
+
+---
+
+# 44. OFFLINE EVENT
+
+When the player returns:
+
+Show:
+
+"Your aquarium was alive while you were away."
+
+Then display:
+
+Fish grew
+
++12
+
+Fish born
+
++4
+
+Coins collected
+
++18,450
+
+Research Points
+
++120
+
+Water Quality
+
+92%
+
+New discovery:
+
+Rare Blue Shrimp
+
+This should feel like a rewarding return screen.
+
+---
+
+# 45. POPUP UI STYLE
+
+Change popup visual design.
+
+IMPORTANT:
+
+Popup background should NOT be an opaque solid rectangle.
+
+Use:
+
+- semi-transparent
+- blurred
+- glass-like
+- dark translucent layer
+- soft border
+- subtle shadow
+
+Background gameplay remains visible.
+
+Recommended:
+
+Background overlay:
+
+Alpha approximately 0.35–0.55
+
+Popup panel:
+
+Alpha approximately 0.75–0.9
+
+The aquarium behind the popup should remain slightly visible.
+
+Do NOT hide the entire game behind an opaque popup.
+
+The player should always feel connected to their aquarium.
+
+---
+
+# 46. GLASS UI STYLE
+
+Use:
+
+**Pixel Art + Soft Glass UI**
+
+Elements:
+
+- translucent dark blue panels
+- soft white borders
+- subtle pixel highlights
+- rounded pixel corners
+- small aquatic bubbles
+- soft underwater glow
+
+Do NOT make the UI overly futuristic.
+
+The UI should remain cozy.
+
+---
+
+# 47. MICRO FEEDBACK
+
+Every important action should have:
+
+- animation
+- particles
+- sound
+- number feedback
+- movement
+
+Examples:
+
+Buy fish:
+
+Fish jumps into aquarium.
+
+Breed:
+
+Egg appears.
+
+Fish grows:
+
+small sparkle.
+
+Rare discovery:
+
+special light burst.
+
+Collect money:
+
+coin flies to wallet.
+
+Research:
+
+research tree node lights up.
+
+New map:
+
+camera transition.
+
+The goal is:
+
+**HIGH VISUAL REWARD WITH LOW USER INPUT.**
+
+---
+
+# 48. ANTI-REPETITION SYSTEM
+
+Do NOT make the game require constant tapping.
+
+The player should spend most of their time:
+
+- observing
+- choosing
+- upgrading
+- collecting
+- discovering
+- decorating
+
+NOT:
+
+- tapping endlessly
+
+This is an idle game, not a clicker.
+
+---
+
+# 49. ACTIVE PLAY VS IDLE PLAY
+
+Target ratio:
+
+Approximately:
+
+20–30% active interaction
+
+70–80% observation / idle progression
+
+Active gameplay should provide meaningful boosts.
+
+Examples:
+
+- feeding
+- collecting creature income
+- finding rare fish
+- solving ecosystem problems
+- choosing upgrades
+- arranging decorations
+
+Idle gameplay:
+
+- income
+- fish growth
+- breeding
+- research progress
+- ecosystem simulation
+
+---
+
+# 50. RESEARCH THE MARKET PATTERN
+
+Use the strongest proven mechanics from modern idle/tycoon games:
+
+- offline earnings
+- automation
+- bottlenecks
+- managers/specialists
+- milestone upgrades
+- collection systems
+- research
+- events
+- weekly challenges
+- prestige / permanent progression
+- multiple progression layers
+
+These patterns appear repeatedly across successful idle games such as Egg, Inc., Idle Miner Tycoon and other modern incremental/tycoon games.
+
+However:
+
+DO NOT clone those games.
+
+Translate the mechanics into the aquarium fantasy.
+
+For example:
+
+Mining Manager
+
+→
+
+Aquarium Specialist
+
+Factory Research
+
+→
+
+Marine Research
+
+Prestige
+
+→
+
+Conservation
+
+Production Chain
+
+→
+
+Ecosystem Chain
+
+Collection
+
+→
+
+Fish / Creature Collection
+
+---
+
+# 51. AQUARIUM SPECIALISTS
+
+Introduce collectible specialists.
+
+Examples:
+
+Marine Biologist
+
+Effect:
++ breeding
+
+Aquatic Botanist
+
+Effect:
++ plant effectiveness
+
+Water Engineer
+
+Effect:
++ filtration
+
+Aquarium Keeper
+
+Effect:
++ offline efficiency
+
+Marine Photographer
+
+Effect:
++ rare discovery
+
+Coral Expert
+
+Effect:
++ coral reef beauty
+
+Each specialist should have:
+
+- rarity
+- level
+- specialty
+- passive bonus
+- visual portrait
+
+Do not require all specialists to be active.
+
+Allow the player to choose a limited number.
+
+This creates strategic choices.
+
+---
+
+# 52. SPECIALIST PROGRESSION
+
+Specialists can be upgraded using:
+
+Specialist XP
+
+and
+
+Research Points.
+
+Avoid making specialists too powerful.
+
+Their purpose:
+
+- provide strategic choices
+- increase long-term progression
+- improve specialization
+
+---
+
+# 53. MAP LOADOUT
+
+Each aquarium can have its own specialist loadout.
+
+Example:
+
+Pond:
+
+Breeding Specialist
+
+Lake:
+
+Growth Specialist
+
+Coral:
+
+Beauty Specialist
+
+Deep Sea:
+
+Rare Discovery Specialist
+
+This reinforces the idea that each map has its own identity.
+
+---
+
+# 54. MAP MASTER LEVEL
+
+Each map should have:
+
+Map Level
+
+Map Collection %
+
+Map Beauty %
+
+Map Research %
+
+Map Ecosystem %
+
+Map Mastery %
+
+When all reach milestones:
+
+unlock:
+
+Map Mastery Rewards.
+
+This gives old maps continued relevance.
+
+---
+
+# 55. RETURNING TO OLD MAPS
+
+Do NOT make old maps obsolete.
+
+Old maps should continue producing:
+
+- resources
+- collection progress
+- research
+- rare variants
+- event rewards
+
+Players should have a reason to revisit:
+
+Pond
+
+even after unlocking:
+
+Ocean.
+
+---
+
+# 56. MULTI-AQUARIUM MANAGEMENT
+
+Late game:
+
+The player owns multiple aquariums.
+
+Each aquarium runs independently.
+
+The player can switch between:
+
+Pond
+
+Lake
+
+River
+
+Wetland
+
+Mangrove
+
+Coral Reef
+
+Ocean
+
+Deep Sea
+
+Each continues progressing offline.
+
+This is the equivalent of multiple businesses in a tycoon game.
+
+---
+
+# 57. GLOBAL PLAYER PROGRESSION
+
+Separate:
+
+LOCAL PROGRESSION
+
+from
+
+GLOBAL PROGRESSION.
+
+LOCAL:
+
+- aquarium level
+- capacity
+- local decorations
+- local creatures
+- local income
+- local upgrades
+
+GLOBAL:
+
+- research
+- collection
+- specialists
+- conservation
+- achievements
+- premium unlocks
+
+This prevents upgrading one map from automatically making every map stronger.
+
+---
+
+# 58. ENDGAME
+
+The game should NOT end after a few hours.
+
+After the player unlocks all maps, introduce:
+
+- rare variants
+- breeding
+- genetic variants
+- specialist collection
+- research mastery
+- conservation
+- weekly events
+- limited aquariums
+- collection completion
+- legendary fish
+- deep-sea discovery
+- aquarium optimization
+
+The game should transition from:
+
+**Progression**
+
+to:
+
+**Optimization + Collection + Completion + Events**
+
+---
+
+# 59. CONTENT DEPTH TARGET
+
+Initial production target:
+
+8 maps
+
+25 fish per map
+
+= 200 base fish species
+
+Plus:
+
+- rare variants
+- color variants
+- breeding variants
+
+Decorations:
+
+30–50 per map
+
+Creatures:
+
+5–8 per map
+
+Specialists:
+
+20+
+
+Research nodes:
+
+50+
+
+Achievements:
+
+50+
+
+Daily missions:
+
+30+
+
+Events:
+
+10+
+
+This should create enough content for a long-term idle game.
+
+Do NOT implement all content immediately.
+
+Build systems that can support this scale.
+
+---
+
+# 60. DATA-DRIVEN CONTENT
+
+Every content type must be data-driven.
+
+Required data:
+
+FishData
+
+FishVariantData
+
+CreatureData
+
+DecorationData
+
+HabitatData
+
+MapData
+
+ResearchData
+
+SpecialistData
+
+MissionData
+
+EventData
+
+RewardData
+
+CurrencyData
+
+Do NOT hardcode fish behavior or economy directly into gameplay code.
+
+---
+
+# 61. TECHNICAL PERFORMANCE
+
+Because this is a mobile game:
+
+DO NOT create one Update() loop per fish.
+
+Use a centralized simulation manager.
+
+Use:
+
+- centralized fish simulation
+- optimized flocking
+- object pooling
+- sprite atlas
+- animation pooling
+- distance-based simulation quality
+- low-frequency ecosystem simulation
+- optimized save system
+
+Example:
+
+Fish movement:
+
+60 FPS visual interpolation
+
+but
+
+ecosystem calculations:
+
+1–5 times per second
+
+This keeps the game smooth.
+
+---
+
+# 62. SIMULATION LEVEL OF DETAIL
+
+Nearby fish:
+
+Full animation
+
+Full behavior
+
+Full interaction
+
+Far/hidden fish:
+
+Reduced simulation
+
+Very far aquarium:
+
+Statistical simulation only
+
+Offline:
+
+Mathematical simulation
+
+Do NOT simulate every fish individually while the player is offline.
+
+---
+
+# 63. SAVE SYSTEM
+
+Save:
+
+- current map
+- unlocked maps
+- map levels
+- map upgrades
+- fish collection
+- fish population
+- fish growth state
+- breeding state
+- creature population
+- creature upgrades
+- decorations
+- decoration positions
+- water quality
+- oxygen
+- research
+- specialists
+- missions
+- events
+- currencies
+- last login timestamp
+
+Save safely.
+
+Never lose progression because the app closes.
+
+---
+
+# 64. DEBUG SYSTEM
+
+Add developer debug tools.
+
+Developer panel must allow:
+
+- Add coins
+- Add gems
+- Add research points
+- Unlock map
+- Unlock fish
+- Spawn fish
+- Grow fish
+- Trigger breeding
+- Set water quality
+- Set oxygen
+- Add creature
+- Complete mission
+- Complete collection
+- Set offline time
+- Trigger event
+- Reset current map
+- Reset full save
+
+This is REQUIRED for development.
+
+---
+
+# 65. BALANCE TARGET
+
+Do not create exponential inflation simply by increasing numbers.
+
+Use:
+
+- meaningful sinks
+- multiple currencies
+- local progression
+- research
+- collection
+- events
+- breeding
+- decoration
+- specialists
+- map mastery
+
+Normal money should have a soft inflation curve.
+
+The player should always have:
+
+At least one meaningful thing to purchase.
+
+But should NOT be able to purchase everything immediately.
+
+---
+
+# 66. PLAYER EMOTIONAL LOOP
+
+The intended emotional loop is:
+
+SEE BEAUTIFUL FISH
+
+↓
+
+COLLECT FISH
+
+↓
+
+PLACE FISH
+
+↓
+
+WATCH FISH SWIM
+
+↓
+
+FISH GROWS
+
+↓
+
+FISH BREEDS
+
+↓
+
+NEW BABY FISH
+
+↓
+
+SCHOOL GETS BIGGER
+
+↓
+
+AQUARIUM LOOKS BETTER
+
+↓
+
+BEAUTY INCREASES
+
+↓
+
+UNLOCK NEW SPECIES
+
+↓
+
+UPGRADE ECOSYSTEM
+
+↓
+
+DISCOVER NEW MAP
+
+↓
+
+REPEAT
+
+This should be the emotional identity of the game.
+
+---
+
+# 67. THE MOST IMPORTANT DESIGN PRINCIPLE
+
+Do NOT make:
+
+"numbers go up"
+
+the primary fantasy.
+
+Make:
+
+**"My aquarium is alive and becoming more beautiful."**
+
+the primary fantasy.
+
+Money is the tool.
+
+Fish are the emotional reward.
+
+The aquarium is the product.
+
+Collection is the long-term motivation.
+
+Research is the strategic layer.
+
+Maps are the progression.
+
+Breeding is the living-system hook.
+
+Decorations are the ecosystem management layer.
+
+---
+
+# 68. IMPLEMENTATION ORDER
+
+Do NOT implement everything simultaneously.
+
+Build in this order:
+
+### PHASE 1
+
+Map system
+
+Fish growth
+
+Fish movement
+
+Schooling
+
+Fish capacity
+
+---
+
+### PHASE 2
+
+Water quality
+
+Oxygen
+
+Space
+
+Fish health
+
+---
+
+### PHASE 3
+
+Breeding
+
+Eggs
+
+Baby fish
+
+Population
+
+---
+
+### PHASE 4
+
+Map-specific creatures
+
+Creature income
+
+Active collection
+
+Automation
+
+---
+
+### PHASE 5
+
+Map-specific decorations
+
+Decoration effects
+
+Ecosystem interactions
+
+---
+
+### PHASE 6
+
+Research
+
+Specialists
+
+Map mastery
+
+---
+
+### PHASE 7
+
+Events
+
+Daily missions
+
+Weekly challenges
+
+---
+
+### PHASE 8
+
+Conservation / soft prestige
+
+Rare variants
+
+Endgame
+
+---
+
+# 69. FIRST PROTOTYPE REQUIREMENT
+
+Do NOT attempt to build 200 fish immediately.
+
+Create a vertical slice containing:
+
+3 maps:
+
+Pond
+
+Lake
+
+Coral Reef
+
+Each map:
+
+5 fish
+
+3 creatures
+
+8 decorations
+
+1 research tree
+
+1 unique mechanic
+
+The prototype should prove:
+
+- fish movement
+- schooling
+- growth
+- breeding
+- oxygen
+- water quality
+- decoration effects
+- creature income
+- map progression
+- local upgrades
+- offline progression
+
+Once the vertical slice works:
+
+scale content to:
+
+8 maps
+
+200+ fish
+
+40+ creatures
+
+200+ decorations
+
+---
+
+# 70. GOOGLE AI STUDIO OUTPUT REQUIREMENT
+
+Before changing code, output:
+
+1. Current architecture analysis
+2. New architecture required
+3. Existing systems to preserve
+4. Existing systems to modify
+5. New systems
+6. Data model
+7. Fish simulation architecture
+8. Schooling algorithm
+9. Ecosystem simulation
+10. Breeding system
+11. Map progression system
+12. Local upgrade system
+13. Economy architecture
+14. Research system
+15. Specialist system
+16. Event system
+17. Save structure
+18. UI architecture
+19. Performance strategy
+20. Development phases
+
+Then implement the system incrementally.
+
+Never create one giant GameManager.
+
+Use modular systems.
+
+Prefer composition over inheritance where appropriate.
+
+Keep systems independently testable.
+
+---
+
+# 71. IMPORTANT CODE QUALITY RULES
+
+When modifying existing code:
+
+- preserve existing variable names where practical
+- preserve existing public APIs unless necessary
+- do not randomly rename classes
+- do not duplicate managers
+- do not create multiple competing economy systems
+- do not create multiple SaveManagers
+- do not create multiple Update loops for the same responsibility
+- do not hardcode content
+- do not put all logic inside UI scripts
+
+Clearly separate:
+
+Data
+
+↓
+
+Simulation
+
+↓
+
+Economy
+
+↓
+
+Progression
+
+↓
+
+UI
+
+↓
+
+Save
+
+---
+
+# 72. FINAL EXPERIENCE TARGET
+
+The finished game should feel like:
+
+A peaceful pixel-art aquarium that is always alive.
+
+The player opens the game and sees:
+
+fish swimming
+
+schools moving
+
+plants swaying
+
+crabs walking
+
+shrimp cleaning
+
+bubbles rising
+
+coins appearing
+
+fish growing
+
+baby fish being born
+
+rare fish appearing
+
+water becoming clearer
+
+decorations affecting the ecosystem
+
+and new maps waiting to be discovered.
+
+The player should want to keep watching.
+
+The game should create the feeling:
+
+**"I want to check my aquarium again."**
+
+not:
+
+**"I need to grind money again."**
+
+This is the key difference between a generic Idle Tycoon reskin and a distinctive **Idle Aquarium Ecosystem Tycoon**.
