@@ -26,7 +26,23 @@ const RESEARCH_CATEGORIES: ResearchCategory[] = [
 
 export const ResearchPanel: React.FC<ResearchPanelProps> = ({ engine, snapshot }) => {
   const [subTab, setSubTab] = useState<'research' | 'specialists' | 'conservation'>('research');
-  const { t, formatNumber, getHabitatName, getRarityLabel } = useLocalization();
+  const {
+    t,
+    formatNumber,
+    getHabitatName,
+    getRarityLabel,
+    getResearchCategory,
+    getResearchName,
+    getResearchDescription,
+    getResearchUnit,
+    getSpecialistName,
+    getSpecialistRole,
+    getSpecialistSpecialty,
+    getSpecialistDescription,
+    getConservationName,
+    getConservationDescription,
+    getConservationBonus,
+  } = useLocalization();
   const { state, activeMapState } = snapshot;
   const activeHabitat = HABITAT_BY_ID[state.activeHabitatId] ?? HABITAT_BY_ID.pond;
   const activeHabitatLabel = getHabitatName(activeHabitat);
@@ -90,7 +106,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({ engine, snapshot }
             return (
               <div key={category} className="space-y-2">
                 <div className="text-xs font-bold uppercase tracking-wider text-[#8df5da]">
-                  {category}
+                  {getResearchCategory(category)}
                 </div>
                 {nodes.map((node) => {
                   const lv = state.researchLevels[node.id] ?? 0;
@@ -112,13 +128,15 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({ engine, snapshot }
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="truncate text-sm font-bold text-white">{node.name}</span>
+                            <span className="truncate text-sm font-bold text-white">
+                              {getResearchName(node)}
+                            </span>
                             <span className="shrink-0 text-[11px] font-semibold text-[#a9f0c8] tabular-nums">
                               {t('UI_LEVEL_SHORT')}{lv}/{node.maxLevel}
                             </span>
                           </div>
                           <p className="mt-0.5 text-[11px] leading-snug text-[#94c2d1]">
-                            {node.description}
+                            {getResearchDescription(node)}
                           </p>
                         </div>
                       </div>
@@ -126,14 +144,16 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({ engine, snapshot }
                       <div className="mt-2.5 flex items-center justify-between gap-2">
                         <span className="text-xs font-semibold text-[#ffe394] tabular-nums">
                           {lv > 0
-                            ? `+${lv * node.effectPerLevel} ${node.effectUnit}`
-                            : `+${node.effectPerLevel} ${node.effectUnit}`}
+                            ? `+${lv * node.effectPerLevel} ${getResearchUnit(node)}`
+                            : `+${node.effectPerLevel} ${getResearchUnit(node)}`}
                         </span>
 
                         {!reqMet ? (
                           <span className="flex items-center gap-1 text-[11px] text-[#8db6c4]">
                             <Lock className="h-3 w-3 shrink-0" />
-                            <span className="truncate">{RESEARCH_BY_ID[node.requiresId!]?.name}</span>
+                            <span className="truncate">
+                              {node.requiresId ? getResearchName(RESEARCH_BY_ID[node.requiresId] ?? node.requiresId) : ''}
+                            </span>
                           </span>
                         ) : (
                           <button
@@ -198,7 +218,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({ engine, snapshot }
                       borderColor: spec.accentColor,
                     }}
                   >
-                    {spec.name
+                    {getSpecialistName(spec)
                       .split(' ')
                       .map((w) => w[0])
                       .join('')
@@ -206,16 +226,18 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({ engine, snapshot }
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-bold text-white">{spec.name}</span>
+                      <span className="truncate text-sm font-bold text-white">
+                        {getSpecialistName(spec)}
+                      </span>
                       <span className="shrink-0 text-[11px] font-semibold text-[#9be7ff]">
                         {isUnlocked ? `${t('UI_LEVEL_SHORT')}${lv}/${spec.maxLevel}` : getRarityLabel(spec.rarity)}
                       </span>
                     </div>
                     <div className="text-[11px] font-semibold text-[#8df5da]">
-                      {spec.role} · +{currentBonus}% {spec.specialty}
+                      {getSpecialistRole(spec)} · +{currentBonus}% {getSpecialistSpecialty(spec)}
                     </div>
                     <p className="mt-0.5 text-[11px] leading-snug text-[#94c2d1]">
-                      {spec.description}
+                      {getSpecialistDescription(spec)}
                     </p>
                   </div>
                 </div>
@@ -284,12 +306,12 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({ engine, snapshot }
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="text-sm font-bold text-white">{proj.name}</div>
+                    <div className="text-sm font-bold text-white">{getConservationName(proj)}</div>
                     <div className="mt-0.5 text-xs font-semibold text-[#ffe484]">
-                      {proj.permanentBonusLabel}
+                      {getConservationBonus(proj)}
                     </div>
                     <p className="mt-1 text-[11px] leading-snug text-[#94c2d1]">
-                      {proj.description}
+                      {getConservationDescription(proj)}
                     </p>
                   </div>
                 </div>

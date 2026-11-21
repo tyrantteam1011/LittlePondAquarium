@@ -199,7 +199,7 @@ export function awardAquariumXp(
     levelUp: {
       fromLevel: startLevel,
       toLevel: level,
-      mapName: HABITAT_BY_ID[activeId]?.name,
+      mapName: LocalizationManager.getHabitatName(activeId),
       unlockedFishIds,
       unlockedDecorationIds,
       gemBonus,

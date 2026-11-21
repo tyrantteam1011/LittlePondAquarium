@@ -46,7 +46,7 @@ export const DiscoveryModal: React.FC<DiscoveryModalProps> = ({ engine, snapshot
         </h2>
         <div className="mt-0.5 text-xs font-semibold text-[#98d9eb] tabular-nums">
           {getRarityLabel(fish.rarity)}
-          {isRareMorph ? ` · ${variantLabel}` : ''} · +{formatNumber(fish.baseIncome)}/s
+          {isRareMorph ? ` · ${variantLabel}` : ''} · +{formatNumber(fish.baseIncome)}{t('UI_PER_SEC')}
         </div>
         <div className="mt-0.5 text-[11px] text-[#8df5da]">
           {getFishHabitat(fish)} · {getFishDiet(fish.dietType)}

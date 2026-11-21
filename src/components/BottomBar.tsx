@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ActivePanelId } from '../game/core/types';
 import { EngineSnapshot, GameEngine } from '../game/core/GameEngine';
 import { getXpForNextLevel } from '../game/core/GameConfig';
@@ -7,6 +7,7 @@ import { getUnclaimedCollectionRewardCount } from '../game/progression/Collectio
 import { getClaimableMilestonesCount } from '../game/progression/MilestoneSystem';
 import { getClaimableMissionCount } from '../game/progression/MissionManager';
 import { getMaxManualFeedCharges } from '../game/feeding/FeedingSystem';
+import { ViewportMetrics } from '../game/layout/layoutConfig';
 import {
   Fish,
   Sprout,
@@ -25,17 +26,22 @@ import {
 interface BottomBarProps {
   engine: GameEngine;
   snapshot: EngineSnapshot;
+  viewport: ViewportMetrics;
   activePanel: ActivePanelId;
   onTogglePanel: (panel: ActivePanelId) => void;
+  onHeightChange?: (heightPx: number) => void;
 }
 
 export const BottomBar: React.FC<BottomBarProps> = ({
   engine,
   snapshot,
+  viewport,
   activePanel,
   onTogglePanel,
+  onHeightChange,
 }) => {
   const { t, formatNumber, formatPercent } = useLocalization();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const {
     state,
     beauty,
@@ -57,6 +63,25 @@ export const BottomBar: React.FC<BottomBarProps> = ({
   const feedBoostSec = Math.max(0, Math.ceil((state.feedBoostEndsAt - Date.now()) / 1000));
   const hasHungerAlert =
     ecosystem.starvingFishCount > 0 || ecosystem.criticalFishCount > 0 || ecosystem.avgHunger < 50;
+
+  const isNarrowXs = viewport.viewportWidth <= 360;
+  const isShortLandscape = viewport.isLandscape && viewport.viewportHeight <= 440;
+  const isCompact = viewport.isCompactHud;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !onHeightChange) return;
+    const report = () => {
+      onHeightChange(Math.ceil(el.getBoundingClientRect().height));
+    };
+    report();
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(report);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+    return undefined;
+  }, [onHeightChange, isCompact, isNarrowXs, isShortLandscape]);
 
   const waterColor =
     ecosystem.waterQuality >= 80
@@ -88,26 +113,53 @@ export const BottomBar: React.FC<BottomBarProps> = ({
   ];
 
   return (
-    <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-30 px-2 pb-2 sm:px-5 sm:pb-3">
-      <div className="mx-auto max-w-2xl">
+    <div
+      ref={containerRef}
+      className="pointer-events-none fixed bottom-0 left-0 right-0 z-30"
+      style={{
+        paddingBottom: `max(${isShortLandscape ? '4px' : '8px'}, env(safe-area-inset-bottom, 0px))`,
+        paddingLeft: `max(${isNarrowXs ? '6px' : '10px'}, env(safe-area-inset-left, 0px))`,
+        paddingRight: `max(${isNarrowXs ? '6px' : '10px'}, env(safe-area-inset-right, 0px))`,
+      }}
+    >
+      <div className={`mx-auto ${isShortLandscape ? 'max-w-4xl' : 'max-w-2xl'}`}>
         {/* Compact Ecosystem Health & Feed Row */}
-        <div className="mb-1.5 flex items-end justify-between gap-2">
+        <div
+          className={`flex items-end justify-between gap-1.5 sm:gap-2 ${
+            isShortLandscape ? 'mb-1' : 'mb-1.5'
+          }`}
+        >
           <button
             type="button"
             onClick={() => onTogglePanel(activePanel === 'decor' ? null : 'decor')}
-            className="pointer-events-auto glass-panel flex min-w-0 items-center gap-3 rounded-xl border border-[#72c4d6]/35 px-3 py-1.5 text-left hover:brightness-110"
+            className={`pointer-events-auto glass-panel flex min-w-0 items-center rounded-xl border border-[#72c4d6]/35 text-left hover:brightness-110 ${
+              isShortLandscape
+                ? 'min-h-[38px] px-2.5 py-1'
+                : isNarrowXs
+                  ? 'min-h-[44px] px-2 py-1'
+                  : 'min-h-[44px] px-3 py-1.5'
+            }`}
             title={t('PANEL_DECOR')}
           >
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] sm:text-xs font-semibold text-[#e4f7fc]">
-                <span className="font-pixel text-[#9be7ff] tabular-nums">
-                  {t('UI_LEVEL_SHORT')}{state.aquariumLevel}
+              <div
+                className={`flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-semibold text-[#e4f7fc] ${
+                  isNarrowXs ? 'text-[10px]' : 'text-[11px] sm:text-xs'
+                }`}
+              >
+                <span className="font-pixel text-[#9be7ff] tabular-nums whitespace-nowrap">
+                  {t('UI_LEVEL_SHORT')}
+                  {state.aquariumLevel}
                 </span>
-                <span aria-hidden="true" className="text-[#5d96a8]">·</span>
+                <span aria-hidden="true" className="text-[#5d96a8]">
+                  ·
+                </span>
                 <span className="tabular-nums text-[#ffe394] whitespace-nowrap">
-                  {t('UI_BEAUTY')} {beauty.total}
+                  {isNarrowXs ? `${beauty.total}` : `${t('UI_BEAUTY')} ${beauty.total}`}
                 </span>
-                <span aria-hidden="true" className="text-[#5d96a8]">·</span>
+                <span aria-hidden="true" className="text-[#5d96a8]">
+                  ·
+                </span>
                 <span className={`inline-flex items-center gap-0.5 tabular-nums ${waterColor}`}>
                   <Droplets className="h-3 w-3 shrink-0" />
                   {formatPercent(ecosystem.waterQuality)}
@@ -116,30 +168,42 @@ export const BottomBar: React.FC<BottomBarProps> = ({
                   <Wind className="h-3 w-3 shrink-0" />
                   {formatPercent(ecosystem.oxygen)}
                 </span>
-                <span className="hidden sm:inline tabular-nums text-[#a5d2e0] whitespace-nowrap">
-                  · {activeHabitatFishCount}/{maxCapacity} {t('UI_FISH')}
-                </span>
+                {!isShortLandscape && (
+                  <span className="hidden sm:inline tabular-nums text-[#a5d2e0] whitespace-nowrap">
+                    · {activeHabitatFishCount}/{maxCapacity} {t('UI_FISH')}
+                  </span>
+                )}
               </div>
-              <div className="mt-1 flex items-center gap-2">
-                <div className="h-1.5 w-28 sm:w-44 overflow-hidden rounded-full bg-[#173c52]">
+              {!isShortLandscape && (
+                <div className="mt-1 flex items-center gap-2">
                   <div
-                    className="h-full bg-[#5bd4c0] transition-all duration-300"
-                    style={{ width: `${xpPct}%` }}
-                  />
+                    className={`h-1.5 overflow-hidden rounded-full bg-[#173c52] ${
+                      isNarrowXs ? 'w-16' : 'w-24 sm:w-44'
+                    }`}
+                  >
+                    <div
+                      className="h-full bg-[#5bd4c0] transition-all duration-300"
+                      style={{ width: `${xpPct}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-[#96c4d4] tabular-nums whitespace-nowrap">
+                    {isNarrowXs
+                      ? `${ecosystem.spaceUsed}/${ecosystem.spaceMax}`
+                      : `${t('UI_SPACE')} ${ecosystem.spaceUsed}/${ecosystem.spaceMax}`}
+                  </span>
                 </div>
-                <span className="text-[10px] text-[#96c4d4] tabular-nums whitespace-nowrap">
-                  {t('UI_SPACE')} {ecosystem.spaceUsed}/{ecosystem.spaceMax}
-                </span>
-              </div>
+              )}
             </div>
           </button>
 
           {/* Right Action Cluster: Local Food Supply / Auto Feeder & Active Feed Button */}
-          <div className="pointer-events-auto flex shrink-0 items-center gap-1.5">
+          <div className="pointer-events-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
             <button
               type="button"
               onClick={() => onTogglePanel(activePanel === 'feeding' ? null : 'feeding')}
-              className={`glass-panel relative min-h-[44px] flex items-center gap-1.5 rounded-xl border px-2.5 text-xs font-bold tabular-nums whitespace-nowrap hover:brightness-110 ${
+              className={`glass-panel relative min-h-[44px] flex items-center gap-1 rounded-xl border font-bold tabular-nums whitespace-nowrap hover:brightness-110 ${
+                isNarrowXs ? 'px-2 text-[11px]' : 'px-2.5 text-xs'
+              } ${
                 activePanel === 'feeding'
                   ? 'border-[#8df5da] bg-[#1a5263]/90 text-white'
                   : hasHungerAlert
@@ -164,25 +228,29 @@ export const BottomBar: React.FC<BottomBarProps> = ({
               data-tutorial-target="nav-feed"
               onClick={() => engine.feedFish()}
               disabled={!feedReady}
-              className={`pixel-btn min-h-[44px] flex shrink-0 items-center gap-1.5 rounded-xl border-2 px-3 sm:px-3.5 text-xs sm:text-sm font-bold whitespace-nowrap ${
+              className={`pixel-btn min-h-[44px] flex shrink-0 items-center gap-1 rounded-xl border-2 font-bold whitespace-nowrap ${
+                isNarrowXs ? 'px-2 text-[11px]' : 'px-3 sm:px-3.5 text-xs sm:text-sm'
+              } ${
                 feedReady
                   ? 'border-[#ffe28a] bg-[#d98c2b] text-[#fffdf5] hover:bg-[#e89b38]'
                   : 'border-[#548394]/40 bg-[#143447]/80 text-[#96bcc9] cursor-default backdrop-blur-sm'
               }`}
             >
               {feedBoostSec > 0 ? (
-                <Sparkles className="h-4 w-4 text-[#ffe394] shrink-0" />
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#ffe394] shrink-0" />
               ) : (
-                <Utensils className="h-4 w-4 shrink-0" />
+                <Utensils className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
               )}
               <span>
                 {feedReady
-                  ? `${t('UI_FEED')} ${activeMapState.manualFeedCharges}/${maxCharges}`
+                  ? isNarrowXs
+                    ? `${activeMapState.manualFeedCharges}/${maxCharges}`
+                    : `${t('UI_FEED')} ${activeMapState.manualFeedCharges}/${maxCharges}`
                   : feedBoostSec > 0
-                    ? `+15% (${feedBoostSec}s)`
+                    ? `+15% (${t('UI_SEC_SHORT', { sec: feedBoostSec })})`
                     : !hasCharges
                       ? `0/${maxCharges}`
-                      : `${Math.ceil(feedCooldownRemainingMs / 1000)}s`}
+                      : t('UI_SEC_SHORT', { sec: Math.ceil(feedCooldownRemainingMs / 1000) })}
               </span>
             </button>
           </div>
@@ -190,7 +258,7 @@ export const BottomBar: React.FC<BottomBarProps> = ({
 
         {/* Thumb-Friendly 6-Tab Primary Navigation */}
         <nav
-          aria-label="Aquarium controls"
+          aria-label={t('ARIA_AQUARIUM_CONTROLS')}
           className="pointer-events-auto glass-panel grid grid-cols-6 gap-1 rounded-2xl border border-[#72c4d6]/40 p-1"
         >
           {navItems.map((item) => {
@@ -202,18 +270,34 @@ export const BottomBar: React.FC<BottomBarProps> = ({
                 type="button"
                 data-tutorial-target={item.tutorialTarget}
                 onClick={() => onTogglePanel(isActive ? null : item.id)}
-                className={`relative min-h-[48px] min-w-0 flex flex-col items-center justify-center rounded-xl px-0.5 py-1 transition-colors ${
+                className={`relative min-w-0 flex items-center justify-center rounded-xl transition-colors ${
+                  isShortLandscape
+                    ? 'min-h-[44px] flex-row gap-1.5 px-1.5 py-1'
+                    : 'min-h-[46px] flex-col px-0.5 py-1'
+                } ${
                   isActive
                     ? 'bg-[#1e5c6b]/90 text-white'
                     : 'text-[#a8d4e3] hover:bg-[#163f54]/70 hover:text-white'
                 }`}
               >
-                <Icon className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isActive ? 'text-[#8df5da]' : ''}`} />
-                <span className="mt-0.5 max-w-full truncate px-0.5 text-[10px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap">
+                <Icon
+                  className={`shrink-0 ${
+                    isShortLandscape ? 'h-4 w-4' : 'h-4 w-4 sm:h-5 sm:w-5'
+                  } ${isActive ? 'text-[#8df5da]' : ''}`}
+                />
+                <span
+                  className={`max-w-full truncate font-semibold tracking-tight whitespace-nowrap ${
+                    isShortLandscape
+                      ? 'text-[11px]'
+                      : isNarrowXs
+                        ? 'mt-0.5 px-0.5 text-[9.5px]'
+                        : 'mt-0.5 px-0.5 text-[10px] sm:text-[11px]'
+                  }`}
+                >
                   {item.label}
                 </span>
                 {item.badgeCount && item.badgeCount > 0 ? (
-                  <span className="absolute top-1 right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#e86a58] px-1 text-[10px] font-bold text-white tabular-nums">
+                  <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#e86a58] px-1 text-[10px] font-bold text-white tabular-nums">
                     {item.badgeCount}
                   </span>
                 ) : null}

@@ -23,6 +23,8 @@ import { AdSimulationModal } from './components/modals/AdSimulationModal';
 import { LanguageSelectionModal } from './components/modals/LanguageSelectionModal';
 import { DebugPanel } from './components/modals/DebugPanel';
 import { AudioService } from './game/services/AudioService';
+import { useViewportScale } from './game/layout/useViewportScale';
+import { computeSafeSwimBounds } from './game/layout/scaleTiers';
 import { X } from 'lucide-react';
 
 const PANEL_TITLE_KEYS: Record<Exclude<ActivePanelId, null>, string> = {
@@ -38,11 +40,27 @@ const PANEL_TITLE_KEYS: Record<Exclude<ActivePanelId, null>, string> = {
 };
 
 export default function App() {
-  const { t } = useLocalization();
+  const { t, debugMode, missingKeyLog, clearMissingKeyLog } = useLocalization();
   const engine = useMemo(() => new GameEngine(), []);
   const [snapshot, setSnapshot] = useState<EngineSnapshot>(() => engine.getSnapshot());
   const [activePanel, setActivePanel] = useState<ActivePanelId>(null);
   const [showDebug, setShowDebug] = useState(false);
+  const [expandMissingKeys, setExpandMissingKeys] = useState(false);
+  const [hudTopPx, setHudTopPx] = useState(64);
+  const [hudBottomPx, setHudBottomPx] = useState(118);
+
+  const viewport = useViewportScale(snapshot.state.settings.displaySize ?? 'auto');
+  const safeBounds = useMemo(
+    () =>
+      computeSafeSwimBounds(
+        viewport.viewportWidth,
+        viewport.viewportHeight,
+        hudTopPx,
+        hudBottomPx,
+        viewport.safeArea
+      ),
+    [viewport.viewportWidth, viewport.viewportHeight, viewport.safeArea, hudTopPx, hudBottomPx]
+  );
 
   useEffect(() => {
     const unsubscribe = engine.subscribe(setSnapshot);
@@ -83,20 +101,39 @@ export default function App() {
   };
 
   return (
-    <main className="relative h-dvh w-screen overflow-hidden bg-[#081b26] text-[#f0f7fa]">
+    <main
+      className="relative h-dvh w-screen overflow-hidden bg-[#081b26] text-[#f0f7fa]"
+      style={
+        {
+          '--ui-scale': String(viewport.uiScale),
+          '--hud-top-px': `${hudTopPx}px`,
+          '--hud-bottom-px': `${hudBottomPx}px`,
+          '--kb-height-px': `${viewport.keyboardHeight}px`,
+        } as React.CSSProperties
+      }
+    >
       {/* Primary Focal Screen: Full-Viewport Living Pixel Art Aquarium */}
       <div className="absolute inset-0">
-        <AquariumCanvas engine={engine} snapshot={snapshot} />
+        <AquariumCanvas
+          engine={engine}
+          snapshot={snapshot}
+          viewport={viewport}
+          safeBounds={safeBounds}
+          hudTopPx={hudTopPx}
+          hudBottomPx={hudBottomPx}
+        />
       </div>
 
       {/* Compact Translucent Top HUD */}
       <TopHud
         engine={engine}
         snapshot={snapshot}
+        viewport={viewport}
         activePanel={activePanel}
         onTogglePanel={handleTogglePanel}
         showDebug={showDebug}
         onToggleDebug={() => setShowDebug((v) => !v)}
+        onHeightChange={setHudTopPx}
       />
 
       {/* Interactive First-10-Min Tutorial & Post-Tutorial Contextual Hints */}
@@ -156,7 +193,7 @@ export default function App() {
               <MissionsPanel engine={engine} snapshot={snapshot} />
             )}
             {activePanel === 'settings' && (
-              <SettingsPanel engine={engine} snapshot={snapshot} />
+              <SettingsPanel engine={engine} snapshot={snapshot} viewport={viewport} />
             )}
             {activePanel === 'feeding' && (
               <FeedingPanel engine={engine} snapshot={snapshot} />
@@ -169,8 +206,10 @@ export default function App() {
       <BottomBar
         engine={engine}
         snapshot={snapshot}
+        viewport={viewport}
         activePanel={activePanel}
         onTogglePanel={handleTogglePanel}
+        onHeightChange={setHudBottomPx}
       />
 
       {/* Flying Pixel Coins, Popups & Toasts */}
@@ -188,6 +227,39 @@ export default function App() {
       {/* Expanded Developer Debug Panel */}
       {showDebug && (
         <DebugPanel engine={engine} onClose={() => setShowDebug(false)} />
+      )}
+
+      {/* Dev-Mode Missing Localization Key Overlay */}
+      {import.meta.env.DEV && (missingKeyLog.length > 0 || debugMode) && (
+        <div className="fixed left-2.5 top-16 z-[65] max-w-xs rounded-xl border border-[#ff9b9b]/60 bg-[#2e1018]/92 px-3 py-2 text-[11px] text-[#ffd4d4] shadow-lg backdrop-blur-sm">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setExpandMissingKeys((v) => !v)}
+              className="font-bold text-[#ffb0b0] hover:underline text-left"
+            >
+              {t('DEBUG_MISSING_OVERLAY', { count: missingKeyLog.length })}
+            </button>
+            {missingKeyLog.length > 0 && (
+              <button
+                type="button"
+                onClick={clearMissingKeyLog}
+                className="rounded bg-[#52202c] px-1.5 py-0.5 text-[10px] font-semibold text-white hover:bg-[#6e2c3c]"
+              >
+                {t('UI_CLOSE')}
+              </button>
+            )}
+          </div>
+          {expandMissingKeys && missingKeyLog.length > 0 && (
+            <ul className="mt-1.5 max-h-36 space-y-0.5 overflow-y-auto font-mono text-[10px] text-[#ffe1e1]">
+              {missingKeyLog.map((entry) => (
+                <li key={entry} className="break-all">
+                  {entry}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </main>
   );

@@ -32,6 +32,7 @@ export const FishPanel: React.FC<FishPanelProps> = ({ engine, snapshot }) => {
   const [showAllMaps, setShowAllMaps] = useState(false);
   const {
     t,
+    tPlural,
     formatNumber,
     formatDuration,
     getFishName,
@@ -177,7 +178,7 @@ export const FishPanel: React.FC<FishPanelProps> = ({ engine, snapshot }) => {
                     </div>
 
                     <div className="mt-0.5 text-[11px] text-[#9ecbd9] tabular-nums">
-                      +{formatNumber(fish.baseIncome)}/s · {t('UI_SPACE')} {fish.spaceRequirement} ·{' '}
+                      +{formatNumber(fish.baseIncome)}{t('UI_PER_SEC')} · {t('UI_SPACE')} {fish.spaceRequirement} ·{' '}
                       {t('UI_FOOD')} {getFishFoodRequirement(fish)} ({getFishDiet(fish.dietType)}) ·{' '}
                       {fish.minimumSchoolSize > 1
                         ? t('FISH_SCHOOL_LABEL', { cur: inTankCount, min: fish.minimumSchoolSize })
@@ -292,8 +293,8 @@ export const FishPanel: React.FC<FishPanelProps> = ({ engine, snapshot }) => {
                       </span>
                     </div>
                     <div className="mt-0.5 text-[11px] text-[#8ef0d8] tabular-nums">
-                      +{formatNumber(creature.coinDropValue)}/{creature.coinDropIntervalSec}s ·
-                      +{formatNumber(creature.passiveIncomePerSec)}/s · +{creature.beautyValue} {t('UI_BEAUTY')}
+                      +{formatNumber(creature.coinDropValue)}/{t('UI_SEC_SHORT', { sec: creature.coinDropIntervalSec })} ·
+                      +{formatNumber(creature.passiveIncomePerSec)}{t('UI_PER_SEC')} · +{creature.beautyValue} {t('UI_BEAUTY')}
                     </div>
                     <div className="mt-0.5 text-[11px] text-[#9ecbd9] tabular-nums">
                       {creature.isLargeCreature ? (
@@ -369,7 +370,7 @@ export const FishPanel: React.FC<FishPanelProps> = ({ engine, snapshot }) => {
             <div className="space-y-2">
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#ffe694]">
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>{activeEggs.length} 🥚</span>
+                <span>{tPlural('FISH_EGGS_COUNT', activeEggs.length)}</span>
               </div>
               {activeEggs.map((egg) => {
                 const def = FISH_BY_ID[egg.fishId];

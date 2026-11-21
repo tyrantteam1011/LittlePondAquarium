@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { AdRequest, AdsService } from '../../game/services/AdsService';
+import { useLocalization } from '../../game/localization/LocalizationManager';
 import { PlayCircle } from 'lucide-react';
 
 export const AdSimulationModal: React.FC = () => {
+  const { t } = useLocalization();
   const [request, setRequest] = useState<AdRequest | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(3);
 
@@ -35,7 +37,7 @@ export const AdSimulationModal: React.FC = () => {
           <PlayCircle className="h-6 w-6" />
         </div>
         <div className="mt-2 text-[11px] font-semibold text-[#98c8d6]">
-          Rewarded Ad Preview
+          {t('AD_MODAL_SUBTITLE')}
         </div>
         <h3 className="mt-1 font-pixel text-base font-bold text-white">
           {request.title}
@@ -57,7 +59,7 @@ export const AdSimulationModal: React.FC = () => {
             onClick={() => AdsService.cancelCurrentAd()}
             className="min-h-[44px] flex-1 rounded-xl border border-[#5ba6ba]/25 bg-[#123042]/80 text-xs font-semibold text-[#b3d9e6] hover:bg-[#1a4359]"
           >
-            Cancel
+            {t('UI_CANCEL')}
           </button>
           <button
             type="button"
@@ -69,7 +71,9 @@ export const AdSimulationModal: React.FC = () => {
                 : 'cursor-wait bg-[#16384a]/80 text-[#86b0bf]'
             }`}
           >
-            {readyToClaim ? 'Claim Reward' : `Reward ready in ${secondsLeft}s...`}
+            {readyToClaim
+              ? t('AD_CLAIM_REWARD')
+              : t('AD_READY_IN', { sec: secondsLeft })}
           </button>
         </div>
       </div>

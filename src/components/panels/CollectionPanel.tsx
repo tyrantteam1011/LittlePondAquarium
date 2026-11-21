@@ -38,8 +38,8 @@ export const CollectionPanel: React.FC<CollectionPanelProps> = ({ engine, snapsh
   const [subTab, setSubTab] = useState<'encyclopedia' | 'maps' | 'milestones'>('encyclopedia');
   const [categoryFilter, setCategoryFilter] = useState<'All' | EncyclopediaCategory>('All');
   const {
-    locale,
     t,
+    formatDate,
     getHabitatName,
     getRarityLabel,
     getVariantLabel,
@@ -53,6 +53,12 @@ export const CollectionPanel: React.FC<CollectionPanelProps> = ({ engine, snapsh
     getCreatureDescription,
     getCreatureAbility,
     getEncyclopediaCategoryLabel,
+    getMilestoneCategory,
+    getMilestoneTitle,
+    getMilestoneDescription,
+    getMilestoneBadge,
+    getCollectionRewardTitle,
+    getCollectionRewardLabel,
   } = useLocalization();
   const { state } = snapshot;
 
@@ -83,7 +89,9 @@ export const CollectionPanel: React.FC<CollectionPanelProps> = ({ engine, snapsh
           <span>
             {t('ENCYCLOPEDIA_TITLE')}: {totalDiscovered}/{totalSpecies} ({totalPct}%)
           </span>
-          <span className="text-[#8df5da]">{state.collectionPoints} CP</span>
+          <span className="text-[#8df5da]">
+            {state.collectionPoints} {t('UI_CP')}
+          </span>
         </div>
         <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#081c28]">
           <div
@@ -160,9 +168,7 @@ export const CollectionPanel: React.FC<CollectionPanelProps> = ({ engine, snapsh
                 entry.kind === 'fish'
                   ? (state.discoveredVariants[entry.id] ?? []).filter((v) => v !== 'normal')
                   : [];
-              const dateLabel = entry.discoveredAt
-                ? new Date(entry.discoveredAt).toLocaleDateString(locale)
-                : null;
+              const dateLabel = entry.discoveredAt ? formatDate(entry.discoveredAt) : null;
 
               const localizedName =
                 entry.kind === 'fish' && entry.fishData
@@ -375,14 +381,18 @@ export const CollectionPanel: React.FC<CollectionPanelProps> = ({ engine, snapsh
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="truncate text-xs font-bold text-white">{ms.title}</span>
+                        <span className="truncate text-xs font-bold text-white">
+                          {getMilestoneTitle(ms)}
+                        </span>
                         <span className="text-[9px] uppercase text-[#8df5da] shrink-0">
-                          {ms.category}
+                          {getMilestoneCategory(ms.category)}
                         </span>
                       </div>
-                      <div className="text-[10px] text-[#9ecbd9]">{ms.description}</div>
+                      <div className="text-[10px] text-[#9ecbd9]">
+                        {getMilestoneDescription(ms)}
+                      </div>
                       <div className="mt-0.5 text-[11px] font-semibold text-[#ffe694]">
-                        {ms.reward.badgeLabel}
+                        {getMilestoneBadge(ms)}
                       </div>
                     </div>
 
@@ -432,9 +442,11 @@ export const CollectionPanel: React.FC<CollectionPanelProps> = ({ engine, snapsh
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-white">{milestone.title}</div>
+                      <div className="text-xs font-bold text-white">
+                        {getCollectionRewardTitle(milestone)}
+                      </div>
                       <div className="text-[11px] font-semibold text-[#ffe694]">
-                        {milestone.reward.label}
+                        {getCollectionRewardLabel(milestone)}
                       </div>
                     </div>
 

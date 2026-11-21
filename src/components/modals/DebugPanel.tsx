@@ -24,7 +24,8 @@ interface DebugAction {
  */
 export const DebugPanel: React.FC<DebugPanelProps> = ({ engine, onClose }) => {
   const [confirmReset, setConfirmReset] = useState(false);
-  const { debugMode, toggleDebugMode } = useLocalization();
+  const { t, debugMode, pseudoLocale, setLocale, toggleDebugMode, togglePseudoLocale } =
+    useLocalization();
 
   const actions: DebugAction[] = [
     { label: '+5K Coins', run: () => engine.debugAddCoins(5000), tone: 'accent' },
@@ -63,12 +64,27 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ engine, onClose }) => {
       tone: debugMode ? 'warn' : 'default',
     },
     {
+      label: pseudoLocale ? t('DEBUG_PSEUDO_ON') : t('DEBUG_PSEUDO_OFF'),
+      run: () => {
+        togglePseudoLocale();
+      },
+      tone: pseudoLocale ? 'warn' : 'default',
+    },
+    {
+      label: 'Test de-DE',
+      run: () => setLocale('de-DE'),
+    },
+    {
+      label: 'Test pt-PT',
+      run: () => setLocale('pt-PT'),
+    },
+    {
       label: 'Run Loc Audit',
       run: () => {
         const report = validateAllLocalizations();
         console.info(formatLocalizationAuditReport(report));
         engine.showToast(
-          `[Loc Audit] ${report.passed ? 'PASS' : 'FAIL'} · Fish ${report.totalFish} · Decor ${report.totalDecor} · Missing ${report.missingKeyCount + report.missingTranslationCount}`
+          `[Loc Audit] ${report.passed ? 'PASS' : 'FAIL'} · Keys ${report.totalKeysChecked} · Missing ${report.missingKeyCount + report.missingTranslationCount}`
         );
       },
       tone: 'accent',
@@ -78,18 +94,18 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ engine, onClose }) => {
 
   return (
     <aside
-      aria-label="Developer Debug Tools"
+      aria-label={t('DEBUG_TITLE')}
       className="glass-panel fixed top-16 right-3 z-50 w-[296px] max-h-[78vh] overflow-y-auto cozy-scroll rounded-2xl border border-[#f7c948]/55 p-3.5 shadow-2xl"
     >
       <div className="mb-2.5 flex items-center justify-between border-b border-[#6cb8cc]/25 pb-2">
         <span className="font-pixel text-xs font-bold text-[#ffe68a]">
-          Dev Debug Console
+          {t('DEBUG_TITLE')}
         </span>
         <button
           type="button"
           onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9ecbd9] hover:bg-[#193d52]/80 hover:text-white"
-          aria-label="Close debug panel"
+          aria-label={t('DEBUG_CLOSE')}
         >
           <X className="h-4 w-4" />
         </button>
@@ -120,7 +136,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ engine, onClose }) => {
           onClick={() => engine.debugResetCurrentMap()}
           className="min-h-[38px] rounded-lg bg-[#4a2b36]/85 px-2.5 text-[11px] font-semibold text-[#ffd1dc] hover:bg-[#613847]"
         >
-          Reset Map
+          {t('DEBUG_RESET_MAP')}
         </button>
 
         {!confirmReset ? (
@@ -129,7 +145,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ engine, onClose }) => {
             onClick={() => setConfirmReset(true)}
             className="min-h-[38px] rounded-lg bg-[#5c2330]/90 px-2.5 text-[11px] font-semibold text-[#ffd4dc] hover:bg-[#752c3c]"
           >
-            Reset Full Save
+            {t('DEBUG_RESET_SAVE')}
           </button>
         ) : (
           <button
@@ -140,7 +156,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ engine, onClose }) => {
             }}
             className="min-h-[38px] rounded-lg bg-[#a62b40] px-2.5 text-[11px] font-bold text-white hover:bg-[#bf344c]"
           >
-            Confirm Reset?
+            {t('DEBUG_CONFIRM_RESET')}
           </button>
         )}
       </div>

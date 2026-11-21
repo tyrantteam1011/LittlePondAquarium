@@ -141,10 +141,10 @@ export interface EngineSnapshot {
 type EngineListener = (snapshot: EngineSnapshot) => void;
 
 const VISITOR_PROFILES = [
-  { name: 'Sophie', role: 'Nature Lover', color: '#7be3d4' },
-  { name: 'Dr. Kenji', role: 'Aquarist', color: '#8ad8ff' },
-  { name: 'Maya', role: 'Botanist', color: '#a5e89e' },
-  { name: 'Clara', role: 'Photographer', color: '#ffd480' },
+  { name: 'Sophie', roleKey: 'VISITOR_ROLE_NATURE', color: '#7be3d4' },
+  { name: 'Dr. Kenji', roleKey: 'VISITOR_ROLE_AQUARIST', color: '#8ad8ff' },
+  { name: 'Maya', roleKey: 'VISITOR_ROLE_BOTANIST', color: '#a5e89e' },
+  { name: 'Clara', roleKey: 'VISITOR_ROLE_PHOTOGRAPHER', color: '#ffd480' },
 ];
 
 export class GameEngine {
@@ -361,7 +361,12 @@ export class GameEngine {
 
       if (events.grownFishIds.length > 0) {
         this.state = incrementMissionProgress(this.state, 'grow_fish', events.grownFishIds.length);
-        this.pushPopup(`Fish grew up! +${events.grownFishIds.length * 2} RP`, 'rp', 50, 34);
+        this.pushPopup(
+          LocalizationManager.get('POPUP_FISH_GREW', { rp: events.grownFishIds.length * 2 }),
+          'rp',
+          50,
+          34
+        );
       }
 
       if (events.laidEggs.length > 0) {
@@ -438,7 +443,7 @@ export class GameEngine {
               foodInfo.pelletColor,
               true
             );
-            this.pushPopup('AUTO FEED', 'info', 50, 26);
+            this.pushPopup(LocalizationManager.get('POPUP_AUTO_FEED'), 'info', 50, 26);
           }
         }
       }
@@ -494,23 +499,26 @@ export class GameEngine {
     const beauty = calculateBeautyBreakdown(this.state, this.state.activeHabitatId);
     const profile = VISITOR_PROFILES[Math.floor(Math.random() * VISITOR_PROFILES.length)];
 
-    let message = 'What a serene little pixel sanctuary!';
+    const habitatName = LocalizationManager.getHabitatName(this.state.activeHabitatId);
+    let message = LocalizationManager.get('VISITOR_REMARK_5', { habitat: habitatName });
     if (eco.waterQuality >= 88 && beauty.total >= 50) {
-      message = 'Crystal-clear water and gorgeous aquascaping — pure tranquility!';
+      message = LocalizationManager.get('VISITOR_REMARK_1');
     } else if (eco.breedingReadySpecies.length > 0) {
-      message = 'Your fish look so healthy they are ready to start a new generation!';
+      message = LocalizationManager.get('VISITOR_REMARK_3');
     } else if (eco.waterQuality < 65) {
-      message = 'The water looks slightly misty — a sponge filter or snail would help.';
+      message = LocalizationManager.get('WARN_WATER_CLOUDY');
     } else if (eco.algaeLevel >= 35) {
-      message = 'Spotted a bit of green algae on the glass — snails love snacking on that!';
+      message = LocalizationManager.get('VISITOR_REMARK_6');
     } else if (this.state.placedFish.filter((f) => f.habitatId === this.state.activeHabitatId).length >= 5) {
-      message = 'I love watching the little fish school together in harmony.';
+      message = LocalizationManager.get('VISITOR_REMARK_2');
+    } else if (beauty.total >= 30) {
+      message = LocalizationManager.get('VISITOR_REMARK_4');
     }
 
     this.visitorRemark = {
       id: `vis_${Date.now()}`,
       visitorName: profile.name,
-      visitorRole: profile.role,
+      visitorRole: LocalizationManager.get(profile.roleKey),
       message,
       accentColor: profile.color,
     };
@@ -1135,7 +1143,15 @@ export class GameEngine {
     this.advanceTutorialIfAt(0);
     AudioService.playReward();
     this.spawnFlyingCoins(7, 50, 52);
-    this.pushPopup(`+${formatNumber(total)} Coins · +${rp} RP`, 'coin', 50, 44);
+    this.pushPopup(
+      LocalizationManager.get('POPUP_OFFLINE_CLAIMED', {
+        coins: LocalizationManager.formatNumber(total),
+        rp: LocalizationManager.formatNumber(rp),
+      }),
+      'coin',
+      50,
+      44
+    );
     this.syncSimulation();
     SaveManager.save(this.state);
     this.emit();
@@ -1150,8 +1166,10 @@ export class GameEngine {
     const rewardAmount = this.offlineReport.coinsEarned * 2;
     AdsService.showRewardedAd({
       placement: 'offline_2x',
-      title: 'Double Offline Earnings',
-      rewardDescription: `Claim +${formatNumber(rewardAmount)} Coins & 2× RP`,
+      title: LocalizationManager.get('AD_OFFLINE_2X_TITLE'),
+      rewardDescription: LocalizationManager.get('AD_OFFLINE_2X_DESC', {
+        amount: LocalizationManager.formatNumber(rewardAmount),
+      }),
       durationSeconds: 3,
       onReward: () => this.claimOfflineEarnings(true),
     });
@@ -1180,14 +1198,14 @@ export class GameEngine {
 
     if (useGems) {
       if (!def.gemCost || this.state.gems < def.gemCost) {
-        this.showToast('Not enough Gems yet.');
+        this.showToast(LocalizationManager.get('TOAST_NEED_GEMS'));
         return false;
       }
       this.state = { ...this.state, gems: this.state.gems - def.gemCost };
     } else {
       const cost = getFishPurchaseCost(fishId, this.state);
       if (this.state.coins < cost) {
-        this.showToast('Keep swimming — need more Coins.');
+        this.showToast(LocalizationManager.get('TOAST_NEED_COINS'));
         return false;
       }
       this.state = { ...this.state, coins: this.state.coins - cost };
@@ -1350,14 +1368,16 @@ export class GameEngine {
     if (def.spaceRequirement > 0) {
       const eco = calculateEcosystemStatus(this.state, this.state.activeHabitatId);
       if (eco.spaceUsed + def.spaceRequirement > eco.spaceMax) {
-        this.showToast(`Needs ${def.spaceRequirement} tank space — upgrade Tank Size or Mastery.`);
+        this.showToast(
+          LocalizationManager.get('TOAST_NEED_SPACE', { space: def.spaceRequirement })
+        );
         return false;
       }
     }
 
     const cost = getCreaturePurchaseCost(creatureId, this.state);
     if (this.state.coins < cost) {
-      this.showToast('Need more Coins for this creature.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_CREATURE'));
       return false;
     }
 
@@ -1423,7 +1443,9 @@ export class GameEngine {
       const pctY = Math.round((coin.y / Math.max(1, this.simulation.worldHeight)) * 100);
       this.spawnFlyingCoins(3, pctX, pctY);
       this.pushPopup(
-        `+${formatNumber(coin.value)} ${coin.isPearl ? 'Pearl' : 'Shell'}`,
+        LocalizationManager.get(coin.isPearl ? 'POPUP_PEARL' : 'POPUP_SHELL', {
+          amount: LocalizationManager.formatNumber(coin.value),
+        }),
         'coin',
         pctX,
         pctY - 5
@@ -1489,7 +1511,7 @@ export class GameEngine {
       this.simulation.worldHeight * 0.5,
       '#9bf5d8'
     );
-    this.pushPopup('Glass Sparkling Clean! +2 RP', 'beauty', 50, 40);
+    this.pushPopup(LocalizationManager.get('POPUP_GLASS_CLEAN'), 'beauty', 50, 40);
     SaveManager.save(this.state);
     this.emit();
   }
@@ -1499,7 +1521,7 @@ export class GameEngine {
       (f) => f.habitatId === this.state.activeHabitatId
     ).length;
     if (activeCount >= getMapSpeciesCapacity(this.state, this.state.activeHabitatId)) {
-      this.showToast('Tank is at capacity — upgrade Active Fish Capacity!');
+      this.showToast(LocalizationManager.get('TOAST_TANK_FULL'));
       return false;
     }
 
@@ -1544,7 +1566,7 @@ export class GameEngine {
     if (!found) return false;
 
     if (this.state.placedFish.length <= 1) {
-      this.showToast('Keep at least 1 fish swimming in your aquarium.');
+      this.showToast(LocalizationManager.get('TOAST_KEEP_ONE_FISH'));
       return false;
     }
 
@@ -1588,13 +1610,13 @@ export class GameEngine {
 
     if (useGems) {
       if (!def.gemCost || this.state.gems < def.gemCost) {
-        this.showToast('Not enough Gems yet.');
+        this.showToast(LocalizationManager.get('TOAST_NEED_GEMS'));
         return false;
       }
       this.state = { ...this.state, gems: this.state.gems - def.gemCost };
     } else {
       if (this.state.coins < def.cost) {
-        this.showToast('Need more Coins for this decoration.');
+        this.showToast(LocalizationManager.get('TOAST_NEED_COINS_DECOR'));
         return false;
       }
       this.state = { ...this.state, coins: this.state.coins - def.cost };
@@ -1723,7 +1745,7 @@ export class GameEngine {
       (d) => d.decorationId === decorationId
     ).length;
     if (owned <= currentlyPlaced) {
-      this.showToast('All owned copies are already placed.');
+      this.showToast(LocalizationManager.get('TOAST_ALL_DECOR_PLACED'));
       this.placingDecorationId = null;
       this.emit();
       return false;
@@ -1847,13 +1869,17 @@ export class GameEngine {
     if (!def) return false;
     const level = this.state.upgradeLevels[upgradeId] ?? 0;
     if (level >= def.maxLevel) {
-      this.showToast(`${def.name} is already maxed!`);
+      this.showToast(
+        LocalizationManager.get('TOAST_ALREADY_MAXED', {
+          name: LocalizationManager.getGlobalUpgradeName(def),
+        })
+      );
       return false;
     }
 
     const cost = getUpgradeCost(upgradeId, level);
     if (this.state.coins < cost) {
-      this.showToast('Not enough Coins for this upgrade.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
 
@@ -1869,7 +1895,12 @@ export class GameEngine {
     this.state = incrementMissionProgress(this.state, 'buy_upgrade', 1);
     AudioService.playReward();
     this.grantXp(GAME_CONFIG.XP_REWARDS.BUY_UPGRADE);
-    this.pushPopup(`${def.name} Lv.${level + 1}`, 'info', 50, 38);
+    this.pushPopup(
+      `${LocalizationManager.getGlobalUpgradeName(def)} ${LocalizationManager.get('UI_LEVEL_SHORT')}${level + 1}`,
+      'info',
+      50,
+      38
+    );
     this.notifyTutorialEvent('upgrade_bought');
     SaveManager.save(this.state);
     this.emit();
@@ -1884,13 +1915,18 @@ export class GameEngine {
 
     const level = mapState.localUpgrades[upgradeId] ?? 0;
     if (level >= def.maxLevel) {
-      this.showToast(`${def.name} is maxed in ${HABITAT_BY_ID[habId].name}!`);
+      this.showToast(
+        LocalizationManager.get('TOAST_MAXED_IN_MAP', {
+          name: LocalizationManager.getLocalUpgradeName(def),
+          habitat: LocalizationManager.getHabitatName(habId),
+        })
+      );
       return false;
     }
 
     const cost = getLocalUpgradeCost(upgradeId, level, habId);
     if (this.state.coins < cost) {
-      this.showToast('Need more Coins for this local map upgrade.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
 
@@ -1912,7 +1948,12 @@ export class GameEngine {
     this.state = incrementMissionProgress(this.state, 'buy_upgrade', 1);
     AudioService.playReward();
     this.grantXp(GAME_CONFIG.XP_REWARDS.BUY_UPGRADE);
-    this.pushPopup(`${HABITAT_BY_ID[habId].name}: ${def.name} Lv.${level + 1}`, 'info', 50, 38);
+    this.pushPopup(
+      `${LocalizationManager.getHabitatName(habId)}: ${LocalizationManager.getLocalUpgradeName(def)} ${LocalizationManager.get('UI_LEVEL_SHORT')}${level + 1}`,
+      'info',
+      50,
+      38
+    );
     this.notifyTutorialEvent('upgrade_bought');
     SaveManager.save(this.state);
     this.emit();
@@ -1926,18 +1967,26 @@ export class GameEngine {
     if (!node) return false;
     const level = this.state.researchLevels[researchId] ?? 0;
     if (level >= node.maxLevel) {
-      this.showToast(`${node.name} is fully researched!`);
+      this.showToast(
+        LocalizationManager.get('TOAST_ALREADY_MAXED', {
+          name: LocalizationManager.getResearchName(node),
+        })
+      );
       return false;
     }
     if (node.requiresId && (this.state.researchLevels[node.requiresId] ?? 0) <= 0) {
-      const reqName = RESEARCH_BY_ID[node.requiresId]?.name ?? node.requiresId;
-      this.showToast(`Research ${reqName} first.`);
+      const reqName = LocalizationManager.getResearchName(node.requiresId);
+      this.showToast(LocalizationManager.get('TOAST_RESEARCH_REQ', { name: reqName }));
       return false;
     }
 
     const cost = Math.round(node.rpCost * Math.pow(1.45, level));
     if (this.state.researchPoints < cost) {
-      this.showToast(`Need ${cost} Research Points (RP).`);
+      this.showToast(
+        LocalizationManager.get('TOAST_NEED_RP', {
+          cost: LocalizationManager.formatNumber(cost),
+        })
+      );
       return false;
     }
 
@@ -1953,7 +2002,12 @@ export class GameEngine {
     this.state = incrementMissionProgress(this.state, 'complete_research', 1);
     AudioService.playDiscovery();
     this.syncSimulation();
-    this.pushPopup(`${node.name} Lv.${level + 1}`, 'rp', 50, 40);
+    this.pushPopup(
+      `${LocalizationManager.getResearchName(node)} ${LocalizationManager.get('UI_LEVEL_SHORT')}${level + 1}`,
+      'rp',
+      50,
+      40
+    );
     this.notifyTutorialEvent('research_bought');
     SaveManager.save(this.state);
     this.emit();
@@ -1965,7 +2019,11 @@ export class GameEngine {
     if (!spec) return false;
     const currentLv = this.state.unlockedSpecialists[specialistId] ?? 0;
     if (currentLv >= spec.maxLevel) {
-      this.showToast(`${spec.name} is at max rank!`);
+      this.showToast(
+        LocalizationManager.get('TOAST_ALREADY_MAXED', {
+          name: LocalizationManager.getSpecialistName(spec),
+        })
+      );
       return false;
     }
     const cost =
@@ -1973,7 +2031,11 @@ export class GameEngine {
         ? spec.unlockRpCost
         : Math.round(spec.upgradeRpBase * Math.pow(1.4, currentLv - 1));
     if (this.state.researchPoints < cost) {
-      this.showToast(`Need ${cost} RP.`);
+      this.showToast(
+        LocalizationManager.get('TOAST_NEED_RP', {
+          cost: LocalizationManager.formatNumber(cost),
+        })
+      );
       return false;
     }
 
@@ -2008,8 +2070,11 @@ export class GameEngine {
     };
 
     AudioService.playReward();
+    const specName = LocalizationManager.getSpecialistName(spec);
     this.pushPopup(
-      currentLv === 0 ? `Hired ${spec.name}!` : `${spec.name} Lv.${currentLv + 1}`,
+      currentLv === 0
+        ? LocalizationManager.get('POPUP_HIRED_SPEC', { name: specName })
+        : `${specName} ${LocalizationManager.get('UI_LEVEL_SHORT')}${currentLv + 1}`,
       'rp',
       50,
       40
@@ -2055,11 +2120,15 @@ export class GameEngine {
     if (!proj || this.state.completedConservationIds.includes(projectId)) return false;
 
     if (this.state.discoveredFishIds.length < proj.minDiscoveredSpecies) {
-      this.showToast(`Discover ${proj.minDiscoveredSpecies} species first.`);
+      this.showToast(
+        LocalizationManager.get('TOAST_DISCOVER_SPECIES_FIRST', {
+          count: proj.minDiscoveredSpecies,
+        })
+      );
       return false;
     }
     if (this.state.coins < proj.coinCost || this.state.researchPoints < proj.rpCost) {
-      this.showToast('Need more Coins or Research Points.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_OR_RP'));
       return false;
     }
 
@@ -2077,7 +2146,14 @@ export class GameEngine {
       this.simulation.worldHeight * 0.45,
       '#7be3d4'
     );
-    this.pushPopup(`${proj.name} Complete!`, 'beauty', 50, 42);
+    this.pushPopup(
+      LocalizationManager.get('POPUP_COMPLETE', {
+        name: LocalizationManager.getConservationName(proj),
+      }),
+      'beauty',
+      50,
+      42
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2113,8 +2189,18 @@ export class GameEngine {
     };
 
     AudioService.playReward();
-    const label = tier >= 100 ? 'MAP MASTER 100%' : `Map Index ${tier}%`;
-    this.pushPopup(`${label}: +${rpReward} RP · +${gemReward} Gems`, 'gem', 50, 42);
+    this.pushPopup(
+      tier >= 100
+        ? LocalizationManager.get('POPUP_MAP_MASTER_100', { rp: rpReward, gems: gemReward })
+        : LocalizationManager.get('POPUP_MAP_INDEX_PCT', {
+            tier,
+            rp: rpReward,
+            gems: gemReward,
+          }),
+      'gem',
+      50,
+      42
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2136,7 +2222,14 @@ export class GameEngine {
 
     AudioService.playLevelUp();
     this.spawnFlyingCoins(7, 50, 48);
-    this.pushPopup('Schooling Week Complete! +40 RP', 'gem', 50, 42);
+    this.pushPopup(
+      LocalizationManager.get('POPUP_EVENT_COMPLETE', {
+        name: LocalizationManager.getEventName(activeEvent),
+      }),
+      'gem',
+      50,
+      42
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2152,14 +2245,14 @@ export class GameEngine {
     const info = getMapFoodInfo(habId);
     const cap = getFoodStorageCapacity(mapState.foodStorageLevel, mapState.masteryLevel);
     if (mapState.foodStored >= cap) {
-      this.showToast('Food Storage is already full!');
+      this.showToast(LocalizationManager.get('TOAST_FOOD_STORAGE_FULL'));
       return false;
     }
 
     const packSize = Math.max(info.buyPackAmount, Math.round(cap * 0.25));
     const cost = Math.round(info.buyPackCoinCost * (packSize / Math.max(1, info.buyPackAmount)));
     if (this.state.coins < cost) {
-      this.showToast('Need more Coins to buy Food.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS'));
       return false;
     }
 
@@ -2177,7 +2270,12 @@ export class GameEngine {
     };
 
     AudioService.playCoin();
-    this.pushPopup(`+${Math.round(added)} ${info.foodName}`, 'info', 50, 40);
+    this.pushPopup(
+      `+${Math.round(added)} ${LocalizationManager.getMapFoodName(habId)}`,
+      'info',
+      50,
+      40
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2188,13 +2286,17 @@ export class GameEngine {
     const mapState = this.state.mapStates[habId];
     if (!mapState) return false;
     if (mapState.foodStorageLevel >= MAX_FOOD_STORAGE_LEVEL) {
-      this.showToast('Food Storage is at max level!');
+      this.showToast(
+        LocalizationManager.get('TOAST_ALREADY_MAXED', {
+          name: LocalizationManager.get('FEED_STORAGE'),
+        })
+      );
       return false;
     }
 
     const cost = getFoodStorageUpgradeCost(mapState.foodStorageLevel, habId);
     if (this.state.coins < cost) {
-      this.showToast('Need more Coins for Food Storage.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
 
@@ -2215,7 +2317,15 @@ export class GameEngine {
 
     AudioService.playReward();
     this.grantXp(GAME_CONFIG.XP_REWARDS.BUY_UPGRADE);
-    this.pushPopup(`Food Storage Lv.${nextLv} (${formatNumber(nextCap)})`, 'info', 50, 38);
+    this.pushPopup(
+      LocalizationManager.get('POPUP_FOOD_STORAGE_LV', {
+        lv: nextLv,
+        cap: LocalizationManager.formatNumber(nextCap),
+      }),
+      'info',
+      50,
+      38
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2226,13 +2336,17 @@ export class GameEngine {
     const mapState = this.state.mapStates[habId];
     if (!mapState) return false;
     if (mapState.foodFactoryLevel >= MAX_FOOD_FACTORY_LEVEL) {
-      this.showToast('Food Factory is at max level!');
+      this.showToast(
+        LocalizationManager.get('TOAST_ALREADY_MAXED', {
+          name: LocalizationManager.get('FEED_FACTORY'),
+        })
+      );
       return false;
     }
 
     const cost = getFoodFactoryUpgradeCost(mapState.foodFactoryLevel, habId);
     if (this.state.coins < cost) {
-      this.showToast('Need more Coins for Food Factory.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
 
@@ -2251,7 +2365,12 @@ export class GameEngine {
 
     AudioService.playReward();
     this.grantXp(GAME_CONFIG.XP_REWARDS.BUY_UPGRADE);
-    this.pushPopup(`Food Factory Lv.${nextLv}`, 'info', 50, 38);
+    this.pushPopup(
+      LocalizationManager.get('POPUP_FOOD_FACTORY_LV', { lv: nextLv }),
+      'info',
+      50,
+      38
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2262,17 +2381,21 @@ export class GameEngine {
     const mapState = this.state.mapStates[habId];
     if (!mapState) return false;
     if (mapState.autoFeederLevel >= MAX_AUTO_FEEDER_LEVEL) {
-      this.showToast('Auto Feeder is at max level!');
+      this.showToast(
+        LocalizationManager.get('TOAST_ALREADY_MAXED', {
+          name: LocalizationManager.get('FEED_AUTO_FEEDER'),
+        })
+      );
       return false;
     }
 
     const cost = getAutoFeederLevelCost(mapState.autoFeederLevel, habId);
     if (this.state.coins < cost.coins) {
-      this.showToast('Need more Coins for Auto Feeder.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
     if (cost.tokens > 0 && mapState.mapTokens < cost.tokens) {
-      this.showToast(`Need ${cost.tokens} Map Tokens.`);
+      this.showToast(LocalizationManager.get('TOAST_NEED_TOKENS', { count: cost.tokens }));
       return false;
     }
 
@@ -2294,7 +2417,9 @@ export class GameEngine {
     AudioService.playLevelUp();
     this.grantXp(GAME_CONFIG.XP_REWARDS.BUY_UPGRADE);
     this.pushPopup(
-      nextLv === 1 ? 'Auto Feeder Unlocked!' : `Auto Feeder Lv.${nextLv}`,
+      nextLv === 1
+        ? LocalizationManager.get('POPUP_AUTO_FEEDER_UNLOCKED')
+        : `${LocalizationManager.get('FEED_AUTO_FEEDER')} ${LocalizationManager.get('UI_LEVEL_SHORT')}${nextLv}`,
       'beauty',
       50,
       38
@@ -2311,23 +2436,29 @@ export class GameEngine {
     if (!mapState || !def) return false;
 
     if (mapState.autoFeederLevel < def.minAutoFeederLevel) {
-      this.showToast(`Requires Auto Feeder Lv.${def.minAutoFeederLevel}.`);
+      this.showToast(
+        LocalizationManager.get('FEED_AUTO_REQUIRES', { level: def.minAutoFeederLevel })
+      );
       return false;
     }
 
     const currentLv = mapState.autoFeederUpgrades[upgradeId] ?? 0;
     if (currentLv >= def.maxLevel) {
-      this.showToast(`${def.name} is maxed!`);
+      this.showToast(
+        LocalizationManager.get('TOAST_ALREADY_MAXED', {
+          name: LocalizationManager.getAutoFeederNodeName(upgradeId),
+        })
+      );
       return false;
     }
 
     const cost = getAutoFeederTreeCost(upgradeId, currentLv, habId);
     if (this.state.coins < cost.coins) {
-      this.showToast('Need more Coins for this upgrade.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
     if (cost.tokens > 0 && mapState.mapTokens < cost.tokens) {
-      this.showToast(`Need ${cost.tokens} Map Tokens.`);
+      this.showToast(LocalizationManager.get('TOAST_NEED_TOKENS', { count: cost.tokens }));
       return false;
     }
 
@@ -2348,7 +2479,12 @@ export class GameEngine {
     };
 
     AudioService.playReward();
-    this.pushPopup(`${def.name} Lv.${currentLv + 1}`, 'info', 50, 38);
+    this.pushPopup(
+      `${LocalizationManager.getAutoFeederNodeName(upgradeId)} ${LocalizationManager.get('UI_LEVEL_SHORT')}${currentLv + 1}`,
+      'info',
+      50,
+      38
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2372,10 +2508,15 @@ export class GameEngine {
 
     AudioService.playLevelUp();
     this.spawnFlyingCoins(6, 50, 48);
-    this.pushPopup(`${ms.title}: ${r.badgeLabel}`, 'gem', 50, 40);
+    this.pushPopup(
+      `${LocalizationManager.getMilestoneTitle(ms)}: ${LocalizationManager.getMilestoneBadge(ms)}`,
+      'gem',
+      50,
+      40
+    );
     if (r.retroactiveMapExpansion) {
-      const targetHab = HABITAT_BY_ID[r.retroactiveMapExpansion.habitatId]?.name ?? 'Map';
-      this.showToast(`Retroactive Expansion unlocked for ${targetHab}!`);
+      const targetHab = LocalizationManager.getHabitatName(r.retroactiveMapExpansion.habitatId);
+      this.showToast(LocalizationManager.get('TOAST_EXPANSION_UNLOCKED', { habitat: targetHab }));
     }
     SaveManager.save(this.state);
     this.emit();
@@ -2387,17 +2528,17 @@ export class GameEngine {
     if (!mapState) return false;
     const currentLv = mapState.masteryLevel ?? 1;
     if (currentLv >= MAX_MAP_MASTERY_LEVEL) {
-      this.showToast('Map Mastery is already Lv.20!');
+      this.showToast(LocalizationManager.get('TOAST_MAP_MASTERY_MAX'));
       return false;
     }
 
     const cost = getMapMasteryUpgradeCost(currentLv, habitatId);
     if (this.state.coins < cost.coins) {
-      this.showToast('Need more Coins for Map Mastery.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
     if (mapState.mapTokens < cost.tokens) {
-      this.showToast(`Need ${cost.tokens} Map Tokens.`);
+      this.showToast(LocalizationManager.get('TOAST_NEED_TOKENS', { count: cost.tokens }));
       return false;
     }
 
@@ -2416,7 +2557,15 @@ export class GameEngine {
     };
 
     AudioService.playLevelUp();
-    this.pushPopup(`${HABITAT_BY_ID[habitatId]?.name} Mastery Lv.${nextLv}!`, 'beauty', 50, 40);
+    this.pushPopup(
+      LocalizationManager.get('POPUP_MASTERY_LV', {
+        habitat: LocalizationManager.getHabitatName(habitatId),
+        lv: nextLv,
+      }),
+      'beauty',
+      50,
+      40
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2428,15 +2577,15 @@ export class GameEngine {
 
     const check = canUnlockNextMapExpansion(this.state, habitatId);
     if (!check.available) {
-      this.showToast('Unlock via Milestones or higher Aquarium Level first.');
+      this.showToast(LocalizationManager.get('TOAST_EXPANSION_LOCKED'));
       return false;
     }
     if (this.state.coins < check.cost.coins) {
-      this.showToast('Need more Coins for Map Expansion.');
+      this.showToast(LocalizationManager.get('TOAST_NEED_COINS_UPGRADE'));
       return false;
     }
     if (mapState.mapTokens < check.cost.tokens) {
-      this.showToast(`Need ${check.cost.tokens} Map Tokens.`);
+      this.showToast(LocalizationManager.get('TOAST_NEED_TOKENS', { count: check.cost.tokens }));
       return false;
     }
 
@@ -2456,7 +2605,10 @@ export class GameEngine {
 
     AudioService.playLevelUp();
     this.pushPopup(
-      `${HABITAT_BY_ID[habitatId]?.name} Expanded! Max Fish Cap ${capAfter}`,
+      LocalizationManager.get('POPUP_MAP_EXPANDED', {
+        habitat: LocalizationManager.getHabitatName(habitatId),
+        cap: capAfter,
+      }),
       'gem',
       50,
       40
@@ -2484,7 +2636,7 @@ export class GameEngine {
       syncManualFeedCharges(mapState, now);
       if (!isTutorialFeed && mapState.manualFeedCharges <= 0) {
         const waitSec = getNextChargeCountdownSec(mapState, now);
-        this.showToast(`Feed Energy recharging (${waitSec}s)...`);
+        this.showToast(LocalizationManager.get('TOAST_FEED_RECHARGING', { sec: waitSec }));
         return false;
       }
     }
@@ -2533,8 +2685,13 @@ export class GameEngine {
     this.grantXp(GAME_CONFIG.XP_REWARDS.FEED_FISH + feedRes.xpBonus);
     this.spawnFlyingCoins(4, 50, 34);
     const feedMsg = feedRes.usedEmergencyCrumbs
-      ? `Hand Crumbs · +${formatNumber(bonusCoins)}`
-      : `+15% (30s) · -${feedRes.foodConsumed} Food · +${formatNumber(bonusCoins)}`;
+      ? LocalizationManager.get('POPUP_HAND_CRUMBS', {
+          coins: LocalizationManager.formatNumber(bonusCoins),
+        })
+      : LocalizationManager.get('POPUP_FEED_BOOST', {
+          food: feedRes.foodConsumed,
+          coins: LocalizationManager.formatNumber(bonusCoins),
+        });
     this.pushPopup(feedMsg, 'coin', 50, 30);
     this.notifyTutorialEvent('fish_fed');
 
@@ -2544,7 +2701,13 @@ export class GameEngine {
     return true;
   }
 
-  handleCanvasTap(worldX: number, worldY: number, pctX: number, pctY: number): void {
+  handleCanvasTap(
+    worldX: number,
+    worldY: number,
+    pctX: number,
+    pctY: number,
+    worldScale = 2
+  ): void {
     const activeTut = getActiveTutorialStep(
       this.state.tutorial,
       this.state.settings.showTutorial
@@ -2564,8 +2727,8 @@ export class GameEngine {
       return;
     }
 
-    // 1. Floating Creature Shell Coin / Pearl
-    const tappedCoin = this.simulation.hitTestCreatureCoin(worldX, worldY);
+    // 1. Floating Creature Shell Coin / Pearl (>=48 CSS px hitbox)
+    const tappedCoin = this.simulation.hitTestCreatureCoin(worldX, worldY, worldScale);
     if (tappedCoin) {
       this.awardCreatureCoin(tappedCoin, false);
       return;
@@ -2578,15 +2741,15 @@ export class GameEngine {
       return;
     }
 
-    // 2. Shimmering Rare Visitor
-    const visitor = this.simulation.hitTestRareVisitor(worldX, worldY);
+    // 2. Shimmering Rare Visitor (>=48 CSS px hitbox)
+    const visitor = this.simulation.hitTestRareVisitor(worldX, worldY, worldScale);
     if (visitor) {
       this.collectRareVisitor(visitor.fishId, pctX, pctY);
       return;
     }
 
-    // 3. Swimming Fish Tap
-    const tappedFish = this.simulation.hitTestFish(worldX, worldY);
+    // 3. Swimming Fish Tap (nearest fish within >=44×44 CSS px hitbox)
+    const tappedFish = this.simulation.hitTestFish(worldX, worldY, worldScale);
     if (tappedFish) {
       const def = FISH_BY_ID[tappedFish.fishId];
       const tip = Math.max(3, Math.ceil((def?.baseIncome ?? 5) * 0.6));
@@ -2686,7 +2849,7 @@ export class GameEngine {
 
     AudioService.playReward();
     this.spawnFlyingCoins(6, 50, 50);
-    this.pushPopup(r.label, 'gem', 50, 42);
+    this.pushPopup(LocalizationManager.getCollectionRewardLabel(milestoneId), 'gem', 50, 42);
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2711,7 +2874,12 @@ export class GameEngine {
 
     AudioService.playReward();
     this.spawnFlyingCoins(6, 50, 48);
-    this.pushPopup(`${milestone.title}: ${milestone.rewardLabel}`, 'beauty', 50, 42);
+    this.pushPopup(
+      `${LocalizationManager.getBeautyMilestoneTitle(milestone.score)}: ${LocalizationManager.getBeautyMilestoneReward(milestone.score)}`,
+      'beauty',
+      50,
+      42
+    );
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2748,7 +2916,7 @@ export class GameEngine {
     AudioService.playReward();
     if (def.reward.xp) this.grantXp(def.reward.xp);
     this.spawnFlyingCoins(5, 50, 50);
-    this.pushPopup(def.reward.label, 'coin', 50, 44);
+    this.pushPopup(LocalizationManager.getMissionReward(def), 'coin', 50, 44);
     SaveManager.save(this.state);
     this.emit();
     return true;
@@ -2777,7 +2945,9 @@ export class GameEngine {
 
     const check = canUnlockHabitat(habitat, this.state);
     if (!check.canUnlock) {
-      this.showToast(`Missing: ${check.reasons.join(' · ')}`);
+      this.showToast(
+        LocalizationManager.get('TOAST_MISSING_REQS', { reasons: check.reasons.join(' · ') })
+      );
       return false;
     }
 
@@ -2842,7 +3012,7 @@ export class GameEngine {
         adBoostEndsAt: base + GAME_CONFIG.AD_BOOST_DURATION_MS,
       };
       AudioService.playReward();
-      this.pushPopup('2× Income Active (30m)', 'coin', 50, 42);
+      this.pushPopup(LocalizationManager.get('POPUP_BOOST_2X'), 'coin', 50, 42);
       SaveManager.save(this.state);
       this.emit();
     };
@@ -2854,8 +3024,8 @@ export class GameEngine {
 
     AdsService.showRewardedAd({
       placement: 'income_boost_30m',
-      title: '2× Income Boost',
-      rewardDescription: 'Double all aquarium coin income for 30 minutes!',
+      title: LocalizationManager.get('AD_BOOST_30M_TITLE'),
+      rewardDescription: LocalizationManager.get('AD_BOOST_30M_DESC'),
       durationSeconds: 3,
       onReward: grant,
     });
@@ -2879,8 +3049,8 @@ export class GameEngine {
 
     AdsService.showRewardedAd({
       placement: 'rare_discover',
-      title: 'Rare Fish Discovery',
-      rewardDescription: 'Attract and discover a rare fish species instantly!',
+      title: LocalizationManager.get('AD_RARE_FISH_TITLE'),
+      rewardDescription: LocalizationManager.get('AD_RARE_FISH_DESC'),
       durationSeconds: 3,
       onReward: grant,
     });
@@ -2900,7 +3070,14 @@ export class GameEngine {
       this.state = incrementMissionProgress(this.state, 'earn_coins', bonus);
       AudioService.playReward();
       this.spawnFlyingCoins(7, 50, 50);
-      this.pushPopup(`+${formatNumber(bonus)} Bonus Coins`, 'coin', 50, 44);
+      this.pushPopup(
+        LocalizationManager.get('POPUP_BONUS_COINS', {
+          amount: LocalizationManager.formatNumber(bonus),
+        }),
+        'coin',
+        50,
+        44
+      );
       SaveManager.save(this.state);
       this.emit();
     };
@@ -2912,8 +3089,10 @@ export class GameEngine {
 
     AdsService.showRewardedAd({
       placement: 'bonus_offline_coins',
-      title: 'Extra Tide Earnings',
-      rewardDescription: `Claim +${formatNumber(bonus)} instant bonus Coins!`,
+      title: LocalizationManager.get('AD_BONUS_COINS_TITLE'),
+      rewardDescription: LocalizationManager.get('AD_BONUS_COINS_DESC', {
+        amount: LocalizationManager.formatNumber(bonus),
+      }),
       durationSeconds: 3,
       onReward: grant,
     });

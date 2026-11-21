@@ -11,6 +11,8 @@ import { FISH_BY_ID, FISH_CATALOG } from '../data/fishCatalog';
 import { CREATURE_BY_ID } from '../data/creatureCatalog';
 import { HABITAT_BY_ID } from '../data/habitatCatalog';
 import { getHungerMultipliers } from '../feeding/HungerSystem';
+import { LAYOUT_CONFIG, SafeSwimBounds } from '../layout/layoutConfig';
+import { getMinWorldHitRadius } from '../layout/scaleTiers';
 
 export interface SimulatedFish {
   instanceId: string;
@@ -142,6 +144,12 @@ export class FishSimulation {
   private autoCollectEnabled = false;
   private coinValueResolver: ((creatureId: string) => number) | null = null;
   private autoCollectCallback: ((coin: FloatingCreatureCoin) => void) | null = null;
+  private safeBounds: SafeSwimBounds = {
+    waterTopNorm: LAYOUT_CONFIG.CANONICAL_WATER_TOP_NORM,
+    floorNorm: LAYOUT_CONFIG.CANONICAL_FLOOR_NORM,
+    safeLeftNorm: 0.02,
+    safeRightNorm: 0.98,
+  };
 
   constructor() {
     for (let i = 0; i < 24; i++) {
@@ -168,31 +176,103 @@ export class FishSimulation {
     this.autoCollectCallback = autoCollectCallback;
   }
 
-  resize(width: number, height: number): void {
-    const prevW = this.worldWidth || 360;
-    const prevH = this.worldHeight || 240;
-    this.worldWidth = Math.max(220, width);
-    this.worldHeight = Math.max(180, height);
+  /**
+   * Cập nhật vùng bơi an toàn (tránh TopHud và BottomBar) và ánh xạ mượt vị trí sinh vật
+   */
+  setSafeBounds(bounds: SafeSwimBounds): void {
+    const prev = this.safeBounds;
+    const changed =
+      Math.abs(prev.waterTopNorm - bounds.waterTopNorm) > 0.004 ||
+      Math.abs(prev.floorNorm - bounds.floorNorm) > 0.004 ||
+      Math.abs(prev.safeLeftNorm - bounds.safeLeftNorm) > 0.004 ||
+      Math.abs(prev.safeRightNorm - bounds.safeRightNorm) > 0.004;
+    if (!changed) return;
 
-    const sx = this.worldWidth / prevW;
-    const sy = this.worldHeight / prevH;
+    const prevTop = this.worldHeight * prev.waterTopNorm;
+    const prevFloor = this.worldHeight * prev.floorNorm;
+    const prevSpanY = Math.max(24, prevFloor - prevTop);
+    const nextTop = this.worldHeight * bounds.waterTopNorm;
+    const nextFloor = this.worldHeight * bounds.floorNorm;
+    const nextSpanY = Math.max(24, nextFloor - nextTop);
+
+    this.safeBounds = { ...bounds };
+
+    const remapY = (y: number) => {
+      const ny = Math.max(0.05, Math.min(0.95, (y - prevTop) / prevSpanY));
+      return nextTop + ny * nextSpanY;
+    };
 
     for (const f of this.fishes) {
-      f.x = Math.max(22, Math.min(this.worldWidth - 22, f.x * sx));
-      f.y = Math.max(34, Math.min(this.worldHeight - 36, f.y * sy));
-      f.targetY = Math.max(34, Math.min(this.worldHeight - 36, f.targetY * sy));
+      f.y = remapY(f.y);
+      f.targetY = remapY(f.targetY);
     }
     for (const c of this.creatures) {
-      c.x = Math.max(18, Math.min(this.worldWidth - 18, c.x * sx));
-      c.y = Math.max(this.worldHeight * 0.35, Math.min(this.worldHeight * 0.88, c.y * sy));
+      if (c.walkMode === 'floor' || c.walkMode === 'stationary') {
+        c.y = Math.min(this.worldHeight - 8, nextFloor + Math.min(6, (this.worldHeight - nextFloor) * 0.25));
+      } else {
+        c.y = remapY(c.y);
+      }
     }
     for (const coin of this.creatureCoins) {
-      coin.x = Math.max(18, Math.min(this.worldWidth - 18, coin.x * sx));
-      coin.y = Math.max(this.worldHeight * 0.24, Math.min(this.worldHeight * 0.84, coin.y * sy));
+      coin.y = remapY(coin.y);
+    }
+    if (this.rareVisitor) {
+      this.rareVisitor.y = remapY(this.rareVisitor.y);
+    }
+  }
+
+  /**
+   * Đổi kích thước thế giới logic khi xoay màn hình / đổi tier mà vẫn giữ nguyên vị trí tương đối của cá
+   */
+  resize(width: number, height: number): void {
+    const prevW = Math.max(LAYOUT_CONFIG.MIN_WORLD_WIDTH, this.worldWidth || 360);
+    const prevH = Math.max(LAYOUT_CONFIG.MIN_WORLD_HEIGHT, this.worldHeight || 240);
+    const prevTop = prevH * this.safeBounds.waterTopNorm;
+    const prevFloor = prevH * this.safeBounds.floorNorm;
+    const prevSpanY = Math.max(24, prevFloor - prevTop);
+
+    this.worldWidth = Math.max(LAYOUT_CONFIG.MIN_WORLD_WIDTH, Math.round(width));
+    this.worldHeight = Math.max(LAYOUT_CONFIG.MIN_WORLD_HEIGHT, Math.round(height));
+
+    const nextTop = this.worldHeight * this.safeBounds.waterTopNorm;
+    const nextFloor = this.worldHeight * this.safeBounds.floorNorm;
+    const nextSpanY = Math.max(24, nextFloor - nextTop);
+    const safeMinX = Math.max(12, this.worldWidth * this.safeBounds.safeLeftNorm + 6);
+    const safeMaxX = Math.max(safeMinX + 20, this.worldWidth * this.safeBounds.safeRightNorm - 6);
+
+    const remapX = (x: number) => {
+      const nx = Math.max(0.04, Math.min(0.96, x / prevW));
+      return Math.max(safeMinX, Math.min(safeMaxX, nx * this.worldWidth));
+    };
+    const remapY = (y: number) => {
+      const ny = Math.max(0.06, Math.min(0.94, (y - prevTop) / prevSpanY));
+      return nextTop + ny * nextSpanY;
+    };
+
+    for (const f of this.fishes) {
+      f.x = remapX(f.x);
+      f.y = remapY(f.y);
+      f.targetY = remapY(f.targetY);
+    }
+    for (const c of this.creatures) {
+      c.x = remapX(c.x);
+      if (c.walkMode === 'floor' || c.walkMode === 'stationary') {
+        c.y = Math.min(this.worldHeight - 8, nextFloor + Math.min(6, (this.worldHeight - nextFloor) * 0.25));
+      } else {
+        c.y = remapY(c.y);
+      }
+    }
+    for (const coin of this.creatureCoins) {
+      coin.x = remapX(coin.x);
+      coin.y = remapY(coin.y);
+    }
+    if (this.rareVisitor) {
+      this.rareVisitor.x = remapX(this.rareVisitor.x);
+      this.rareVisitor.y = remapY(this.rareVisitor.y);
     }
     for (const b of this.bubbles) {
       b.x = Math.random() * this.worldWidth;
-      b.y = Math.random() * this.worldHeight;
+      b.y = nextTop + Math.random() * nextSpanY;
     }
   }
 
@@ -225,20 +305,23 @@ export class FishSimulation {
       } else {
         const def = FISH_BY_ID[pf.fishId];
         const depth = def?.preferredDepth ?? 'mid';
+        const waterTop = this.worldHeight * this.safeBounds.waterTopNorm + 6;
+        const floorY = this.worldHeight * this.safeBounds.floorNorm - 4;
+        const swimSpan = Math.max(24, floorY - waterTop);
         const minY =
           depth === 'surface'
-            ? this.worldHeight * 0.17
+            ? waterTop + swimSpan * 0.06
             : depth === 'bottom'
-              ? this.worldHeight * 0.72
+              ? waterTop + swimSpan * 0.76
               : depth === 'deep'
-                ? this.worldHeight * 0.45
-                : this.worldHeight * 0.24;
+                ? waterTop + swimSpan * 0.48
+                : waterTop + swimSpan * 0.18;
         const maxY =
           depth === 'surface'
-            ? this.worldHeight * 0.45
+            ? waterTop + swimSpan * 0.42
             : depth === 'bottom'
-              ? this.worldHeight * 0.84
-              : this.worldHeight * 0.74;
+              ? floorY
+              : waterTop + swimSpan * 0.82;
         const y = minY + Math.random() * Math.max(10, maxY - minY);
         const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
         const speed = (def?.speed ?? 36) * (0.75 + Math.random() * 0.45);
@@ -336,12 +419,15 @@ export class FishSimulation {
             ? 'stationary'
             : 'floor';
 
+        const waterTop = this.worldHeight * this.safeBounds.waterTopNorm + 8;
+        const floorY = this.worldHeight * this.safeBounds.floorNorm;
+        const swimSpan = Math.max(24, floorY - waterTop);
         const y =
           profile === 'frog_hop'
-            ? this.worldHeight * (0.22 + Math.random() * 0.25)
+            ? waterTop + swimSpan * (0.12 + Math.random() * 0.28)
             : isMid
-              ? this.worldHeight * (0.26 + Math.random() * 0.42)
-              : this.worldHeight * (0.83 + Math.random() * 0.05);
+              ? waterTop + swimSpan * (0.18 + Math.random() * 0.54)
+              : Math.min(this.worldHeight - 8, floorY + Math.random() * 4);
         const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
         const speedByProfile: Record<CreatureMovementProfile, number> = {
           shark_sweep: 28,
@@ -383,10 +469,11 @@ export class FishSimulation {
     isAutoFeed = false
   ): void {
     for (let i = 0; i < count; i++) {
+      const dropTopY = this.worldHeight * this.safeBounds.waterTopNorm + 2;
       this.pellets.push({
         id: this.nextPelletId++,
         x: this.worldWidth * (0.18 + Math.random() * 0.64),
-        y: this.worldHeight * 0.1 + Math.random() * 10,
+        y: dropTopY + Math.random() * 8,
         vy: 14 + Math.random() * 8,
         swayOffset: Math.random() * Math.PI * 2,
         active: true,
@@ -457,11 +544,14 @@ export class FishSimulation {
     }
 
     const fromLeft = Math.random() < 0.5;
+    const waterTop = this.worldHeight * this.safeBounds.waterTopNorm + 10;
+    const floorY = this.worldHeight * this.safeBounds.floorNorm - 10;
+    const swimSpan = Math.max(20, floorY - waterTop);
     this.rareVisitor = {
       active: true,
       fishId: candidateId,
       x: fromLeft ? -26 : this.worldWidth + 26,
-      y: this.worldHeight * (0.26 + Math.random() * 0.36),
+      y: waterTop + swimSpan * (0.2 + Math.random() * 0.5),
       facing: fromLeft ? 1 : -1,
       speed: 26,
       phase: 0,
@@ -469,16 +559,45 @@ export class FishSimulation {
     };
   }
 
-  hitTestCreatureCoin(x: number, y: number): FloatingCreatureCoin | null {
+  /**
+   * Kiểm tra xem điểm chạm có nằm trong hitbox (>=48 CSS px) của xu sinh vật hay không
+   */
+  hasCreatureCoinAt(x: number, y: number, worldScale = 2): boolean {
+    const hitR = getMinWorldHitRadius(LAYOUT_CONFIG.MIN_HITBOX_CSS_PX.coin, worldScale, 12);
+    const hitRSq = hitR * hitR;
     for (let i = this.creatureCoins.length - 1; i >= 0; i--) {
       const coin = this.creatureCoins[i];
       const dx = x - coin.x;
       const dy = y - coin.y;
-      if (dx * dx + dy * dy <= 22 * 22) {
-        this.creatureCoins.splice(i, 1);
-        this.spawnCelebrationBurst(coin.x, coin.y, coin.isPearl ? '#e3f9ff' : '#ffe58f');
-        return coin;
+      if (dx * dx + dy * dy <= hitRSq) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Nhặt xu sinh vật gần điểm chạm nhất (hitbox tối thiểu 48×48 CSS px)
+   */
+  hitTestCreatureCoin(x: number, y: number, worldScale = 2): FloatingCreatureCoin | null {
+    const hitR = getMinWorldHitRadius(LAYOUT_CONFIG.MIN_HITBOX_CSS_PX.coin, worldScale, 12);
+    const hitRSq = hitR * hitR;
+    let bestIdx = -1;
+    let bestDistSq = Number.POSITIVE_INFINITY;
+
+    for (let i = 0; i < this.creatureCoins.length; i++) {
+      const coin = this.creatureCoins[i];
+      const dx = x - coin.x;
+      const dy = y - coin.y;
+      const dSq = dx * dx + dy * dy;
+      if (dSq <= hitRSq && dSq < bestDistSq) {
+        bestDistSq = dSq;
+        bestIdx = i;
       }
+    }
+
+    if (bestIdx >= 0) {
+      const [coin] = this.creatureCoins.splice(bestIdx, 1);
+      this.spawnCelebrationBurst(coin.x, coin.y, coin.isPearl ? '#e3f9ff' : '#ffe58f');
+      return coin;
     }
     return null;
   }
@@ -492,31 +611,54 @@ export class FishSimulation {
     return taken;
   }
 
-  hitTestRareVisitor(x: number, y: number): RareVisitorState | null {
-    if (!this.rareVisitor || !this.rareVisitor.active) return null;
+  /**
+   * Kiểm tra hitbox (>=48 CSS px) của khách hiếm
+   */
+  hasRareVisitorAt(x: number, y: number, worldScale = 2): boolean {
+    if (!this.rareVisitor || !this.rareVisitor.active) return false;
+    const hitR = getMinWorldHitRadius(LAYOUT_CONFIG.MIN_HITBOX_CSS_PX.rareVisitor, worldScale, 20);
     const dx = x - this.rareVisitor.x;
     const dy = y - this.rareVisitor.y;
-    if (dx * dx + dy * dy <= 34 * 34) {
-      const captured = { ...this.rareVisitor };
-      this.spawnCelebrationBurst(captured.x, captured.y, '#ffe896');
-      this.rareVisitor = null;
-      this.resetRareVisitorTimer();
-      return captured;
-    }
-    return null;
+    return dx * dx + dy * dy <= hitR * hitR;
   }
 
-  hitTestFish(x: number, y: number): SimulatedFish | null {
-    for (let i = this.fishes.length - 1; i >= 0; i--) {
+  hitTestRareVisitor(x: number, y: number, worldScale = 2): RareVisitorState | null {
+    if (!this.hasRareVisitorAt(x, y, worldScale) || !this.rareVisitor) return null;
+    const captured = { ...this.rareVisitor };
+    this.spawnCelebrationBurst(captured.x, captured.y, '#ffe896');
+    this.rareVisitor = null;
+    this.resetRareVisitorTimer();
+    return captured;
+  }
+
+  /**
+   * Chọn chú cá GẦN điểm chạm nhất trong hitbox tối thiểu 44×44 CSS px
+   */
+  hitTestFish(x: number, y: number, worldScale = 2): SimulatedFish | null {
+    const minRadiusWorld = getMinWorldHitRadius(LAYOUT_CONFIG.MIN_HITBOX_CSS_PX.fish, worldScale, 11);
+    let nearestFish: SimulatedFish | null = null;
+    let nearestDistSq = Number.POSITIVE_INFINITY;
+
+    for (let i = 0; i < this.fishes.length; i++) {
       const f = this.fishes[i];
+      const def = FISH_BY_ID[f.fishId];
+      const stageScale = GAME_CONFIG.GROWTH_STAGE_VISUAL_SCALE[f.growthStage] ?? 1;
+      const spriteHalf = 11 * (def?.size ?? 1) * stageScale;
+      const hitR = Math.max(minRadiusWorld, spriteHalf);
       const dx = x - f.x;
       const dy = y - f.y;
-      if (dx * dx + dy * dy <= 24 * 24) {
-        f.happyTimer = 3.5;
-        f.burstTimer = 0.65;
-        this.addRipple(f.x, f.y, '#ffe58f');
-        return f;
+      const dSq = dx * dx + dy * dy;
+      if (dSq <= hitR * hitR && dSq < nearestDistSq) {
+        nearestDistSq = dSq;
+        nearestFish = f;
       }
+    }
+
+    if (nearestFish) {
+      nearestFish.happyTimer = 3.5;
+      nearestFish.burstTimer = 0.65;
+      this.addRipple(nearestFish.x, nearestFish.y, '#ffe58f');
+      return nearestFish;
     }
     return null;
   }
@@ -529,8 +671,11 @@ export class FishSimulation {
 
   update(dtSeconds: number): void {
     const dt = Math.min(dtSeconds, 0.06);
-    const waterTop = this.worldHeight * 0.14;
-    const floorY = this.worldHeight * 0.85;
+    const waterTop = this.worldHeight * this.safeBounds.waterTopNorm + 4;
+    const floorY = this.worldHeight * this.safeBounds.floorNorm;
+    const swimSpan = Math.max(24, floorY - waterTop);
+    const safeMinXBase = Math.max(12, this.worldWidth * this.safeBounds.safeLeftNorm);
+    const safeMaxXBase = Math.min(this.worldWidth - 12, this.worldWidth * this.safeBounds.safeRightNorm);
     const habitat = HABITAT_BY_ID[this.currentHabitatId];
     const currentStrength = habitat?.currentStrength ?? 0;
 
@@ -625,18 +770,18 @@ export class FishSimulation {
 
           // Vertical depth target (drift slightly higher if oxygen is low)
           if (Math.random() < dt * 0.35) {
-            const lowO2Lift = this.currentOxygen < 55 ? -this.worldHeight * 0.15 : 0;
+            const lowO2Lift = this.currentOxygen < 55 ? -swimSpan * 0.18 : 0;
             const minY = isBottom
-              ? this.worldHeight * 0.67
+              ? waterTop + swimSpan * 0.72
               : waterTop + fishRadius + 4;
             const maxY = isBottom
-              ? floorY - fishRadius * 0.5
+              ? floorY - Math.min(fishRadius * 0.5, 4)
               : isSurface
-                ? this.worldHeight * 0.52
-                : this.worldHeight * 0.76;
+                ? waterTop + swimSpan * 0.48
+                : waterTop + swimSpan * 0.84;
             fish.targetY = Math.max(
               waterTop + fishRadius + 4,
-              minY + Math.random() * Math.max(8, maxY - minY) + lowO2Lift
+              Math.min(floorY - 4, minY + Math.random() * Math.max(8, maxY - minY) + lowO2Lift)
             );
           }
 
@@ -719,18 +864,19 @@ export class FishSimulation {
       const bobAmp = def?.animationStyle === 'pulse' ? 7.5 : 3.5;
       fish.y += fish.vy * dt + Math.sin(fish.phase) * bobAmp * dt;
 
-      // Dynamic Safe Boundaries (guaranteed inside water volume)
-      const marginX = Math.max(18, fishRadius + 8);
+      // Dynamic Safe Boundaries (guaranteed inside visible water volume between HUDs)
+      const marginX = Math.max(safeMinXBase, fishRadius + 6);
+      const maxXBound = Math.min(safeMaxXBase, this.worldWidth - fishRadius - 6);
       if (fish.x < marginX) {
         fish.x = marginX;
         fish.vx = Math.abs(fish.vx) + 12;
-      } else if (fish.x > this.worldWidth - marginX) {
-        fish.x = this.worldWidth - marginX;
+      } else if (fish.x > maxXBound) {
+        fish.x = maxXBound;
         fish.vx = -Math.abs(fish.vx) - 12;
       }
 
-      const minY = isBottom ? this.worldHeight * 0.64 : waterTop + fishRadius + 2;
-      const maxY = isBottom ? floorY - 3 : floorY - fishRadius * 0.6;
+      const minY = isBottom ? waterTop + swimSpan * 0.68 : waterTop + fishRadius + 2;
+      const maxY = isBottom ? floorY - 3 : Math.max(minY + 6, floorY - fishRadius * 0.6);
       if (fish.y < minY) {
         fish.y = minY;
         fish.vy = Math.abs(fish.vy);
@@ -923,7 +1069,7 @@ export class FishSimulation {
             c.x = this.worldWidth - 20;
             c.vx = -Math.abs(c.vx);
           }
-          c.y = Math.max(waterTop + 14, Math.min(this.worldHeight * 0.56, c.y));
+          c.y = Math.max(waterTop + 10, Math.min(waterTop + swimSpan * 0.55, c.y));
           c.facing = c.vx >= 0 ? 1 : -1;
           break;
         }

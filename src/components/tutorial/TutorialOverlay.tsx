@@ -413,7 +413,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                 {t('OFFLINE_EARNINGS_LABEL')}
               </span>
               <span className="font-bold text-[#8df5da]">
-                {t('UI_COINS')} · {t('UI_RP')} · 8h
+                {t('UI_COINS')} · {t('UI_RP')} · {t('OFFLINE_CAP_HOURS', { hours: 8 })}
               </span>
             </div>
           )}

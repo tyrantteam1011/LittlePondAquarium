@@ -20,13 +20,24 @@ interface HabitatPanelProps {
 
 export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) => {
   const { state, beauty } = snapshot;
-  const { t, formatNumber, formatPercent, getHabitatName } = useLocalization();
+  const {
+    t,
+    formatNumber,
+    formatPercent,
+    getHabitatName,
+    getHabitatSpec,
+    getHabitatMechanic,
+    getHabitatToken,
+  } = useLocalization();
 
   return (
     <div className="space-y-3">
       <div className="rounded-xl border border-[#72c4d6]/30 bg-[#0d2a3b]/70 px-3 py-2 text-xs text-[#bfe3ee] flex items-center justify-between">
         <span className="font-bold text-white">
-          {state.unlockedHabitats.length} / {HABITAT_CATALOG.length} Maps
+          {t('MAP_UNLOCKED_COUNT', {
+            cur: state.unlockedHabitats.length,
+            total: HABITAT_CATALOG.length,
+          })}
         </span>
         <span className="text-[11px] text-[#8df5da]">{t('MAP_NO_RESET_NOTE')}</span>
       </div>
@@ -96,7 +107,7 @@ export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) 
                       )}
                     </div>
                     <div className="mt-0.5 text-[11px] font-semibold text-[#ffe394]">
-                      {habitat.specializationLabel} · {habitat.incomeMultiplier}×
+                      {getHabitatSpec(habitat)} · {habitat.incomeMultiplier}×
                     </div>
                   </div>
 
@@ -135,19 +146,21 @@ export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) 
                 </div>
 
                 <p className="mt-1.5 text-[11px] leading-snug text-[#9bc7d6]">
-                  {habitat.uniqueMechanic}
+                  {getHabitatMechanic(habitat)}
                 </p>
 
                 {isUnlocked && mapState && masteryBonuses && expBonus ? (
                   <div className="mt-2.5 space-y-2.5 border-t border-[#5ba6ba]/20 pt-2">
                     <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#bfe3ee] tabular-nums">
                       <span>
-                        {fishCount} {t('UI_FISH')} · {creatureCount} 🐚 · Food{' '}
-                        {formatNumber(Math.round(mapState.foodStored))} · Auto{' '}
-                        {mapState.autoFeederLevel > 0 ? `Lv.${mapState.autoFeederLevel}` : 'OFF'}
+                        {fishCount} {t('UI_FISH')} · {creatureCount} 🐚 · {t('UI_FOOD')}{' '}
+                        {formatNumber(Math.round(mapState.foodStored))} · {t('UI_AUTO')}{' '}
+                        {mapState.autoFeederLevel > 0
+                          ? `${t('UI_LEVEL_SHORT')}${mapState.autoFeederLevel}`
+                          : t('UI_OFF')}
                       </span>
                       <span className="font-semibold text-[#9be7ff]">
-                        {formatNumber(mapState.mapTokens)} {habitat.tokenName}
+                        {formatNumber(mapState.mapTokens)} {getHabitatToken(habitat)}
                       </span>
                     </div>
 
@@ -157,11 +170,15 @@ export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) 
                         <div className="flex items-center gap-1 text-[11px] font-bold text-[#8df5da]">
                           <TrendingUp className="h-3 w-3 shrink-0" />
                           <span>
-                            {t('MAP_MASTERY_LABEL')} Lv.{masteryLv}/{MAX_MAP_MASTERY_LEVEL}
+                            {t('MAP_MASTERY_LABEL')} {t('UI_LEVEL_SHORT')}{masteryLv}/{MAX_MAP_MASTERY_LEVEL}
                           </span>
                         </div>
                         <div className="text-[10px] text-[#9ecbd9] tabular-nums">
-                          +{masteryBonuses.extraFishSlots} slots · +{masteryBonuses.incomeBonusPct}% coins · +{masteryBonuses.foodCapacityBonusPct}% food cap
+                          {t('MAP_MASTERY_BONUS_SUMMARY', {
+                            slots: masteryBonuses.extraFishSlots,
+                            coins: masteryBonuses.incomeBonusPct,
+                            food: masteryBonuses.foodCapacityBonusPct,
+                          })}
                         </div>
                       </div>
                       <button
@@ -178,7 +195,7 @@ export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) 
                       >
                         {masteryMaxed
                           ? t('UI_MAXED')
-                          : `${formatNumber(masteryCost.coins)} + ${masteryCost.tokens}T`}
+                          : `${formatNumber(masteryCost.coins)} + ${masteryCost.tokens}${t('UI_TOKEN_SHORT')}`}
                       </button>
                     </div>
 
@@ -189,14 +206,18 @@ export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) 
                           <div className="flex items-center gap-1 text-[11px] font-bold text-[#ffe694]">
                             <Expand className="h-3 w-3 shrink-0" />
                             <span>
-                              {t('MAP_EXPANSION_LABEL')} (Cap {expBonus.maxFishCeiling} →{' '}
-                              {expCheck.nextTier >= 2 ? 100 : 75})
+                              {t('MAP_EXPANSION_LABEL')} (
+                              {t('MAP_EXPANSION_CAP', {
+                                cur: expBonus.maxFishCeiling,
+                                next: expCheck.nextTier >= 2 ? 100 : 75,
+                              })}
+                              )
                             </span>
                           </div>
                           <div className="text-[10px] text-[#9ecbd9]">
                             {expCheck.available
-                              ? 'Ready to expand old tank capacity!'
-                              : 'Unlock via Milestones or Aquarium Level'}
+                              ? t('MAP_EXPANSION_READY')
+                              : t('MAP_EXPANSION_LOCKED_HINT')}
                           </div>
                         </div>
                         <button
@@ -210,7 +231,7 @@ export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) 
                           }`}
                         >
                           {expCheck.available
-                            ? `${formatNumber(expCheck.cost.coins)} + ${expCheck.cost.tokens}T`
+                            ? `${formatNumber(expCheck.cost.coins)} + ${expCheck.cost.tokens}${t('UI_TOKEN_SHORT')}`
                             : t('UI_LOCKED')}
                         </button>
                       </div>
@@ -220,7 +241,10 @@ export const HabitatPanel: React.FC<HabitatPanelProps> = ({ engine, snapshot }) 
                     <div>
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="text-[#9ecbd9]">
-                          Species {speciesIdx.totalDiscovered}/{speciesIdx.totalSpecies}
+                          {t('MAP_SPECIES_PROGRESS', {
+                            cur: speciesIdx.totalDiscovered,
+                            total: speciesIdx.totalSpecies,
+                          })}
                         </span>
                         <span className="font-bold text-[#ffe694] tabular-nums">
                           {formatPercent(speciesIdx.percent)}

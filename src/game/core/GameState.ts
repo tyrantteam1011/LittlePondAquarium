@@ -1,5 +1,6 @@
 import { GAME_CONFIG, getTodayDateKey } from './GameConfig';
 import {
+  DisplaySizePreference,
   GeneticVariant,
   GrowthStage,
   HabitatId,
@@ -234,6 +235,7 @@ export function createInitialGameState(): SaveGameState {
       ambientEnabled: true,
       showTutorial: true,
       reducedMotion: false,
+      displaySize: 'auto',
     },
   };
 }
@@ -484,6 +486,11 @@ export function sanitizeLoadedState(raw: Partial<SaveGameState>): SaveGameState 
     settings: {
       ...defaults.settings,
       ...(raw.settings ?? {}),
+      displaySize: (
+        ['auto', 'smaller', 'larger'] as DisplaySizePreference[]
+      ).includes(raw.settings?.displaySize as DisplaySizePreference)
+        ? (raw.settings?.displaySize as DisplaySizePreference)
+        : 'auto',
     },
   };
 }

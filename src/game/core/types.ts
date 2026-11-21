@@ -744,11 +744,14 @@ export interface FlyingCoin {
 
 export type GraphicsQualityPreset = 'low' | 'medium' | 'high';
 
+export type DisplaySizePreference = 'auto' | 'smaller' | 'larger';
+
 export interface GameSettings {
   soundEnabled: boolean;
   ambientEnabled: boolean;
   showTutorial: boolean;
   reducedMotion: boolean;
+  displaySize: DisplaySizePreference;
   graphicsQuality?: GraphicsQualityPreset;
 }
 

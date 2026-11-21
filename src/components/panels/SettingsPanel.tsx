@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import { EngineSnapshot, GameEngine } from '../../game/core/GameEngine';
 import { GAME_CONFIG } from '../../game/core/GameConfig';
+import { HABITAT_CATALOG } from '../../game/data/habitatCatalog';
 import { SaveManager } from '../../game/services/SaveManager';
 import { SUPPORTED_LANGUAGES } from '../../game/localization/types';
 import { useLocalization } from '../../game/localization/LocalizationManager';
-import { Check, Globe, RotateCcw } from 'lucide-react';
+import { Check, Globe, Monitor, RotateCcw } from 'lucide-react';
+import { DisplaySizePreference } from '../../game/core/types';
+import { ViewportMetrics } from '../../game/layout/layoutConfig';
 
 interface SettingsPanelProps {
   engine: GameEngine;
   snapshot: EngineSnapshot;
+  viewport: ViewportMetrics;
 }
 
-export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot }) => {
+const DISPLAY_SIZE_OPTIONS: { id: DisplaySizePreference; labelKey: string }[] = [
+  { id: 'smaller', labelKey: 'SETTINGS_DISPLAY_SIZE_SMALLER' },
+  { id: 'auto', labelKey: 'SETTINGS_DISPLAY_SIZE_AUTO' },
+  { id: 'larger', labelKey: 'SETTINGS_DISPLAY_SIZE_LARGER' },
+];
+
+export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot, viewport }) => {
   const { state } = snapshot;
   const { locale, setLocale, t } = useLocalization();
   const [confirmReset, setConfirmReset] = useState(false);
@@ -24,8 +34,58 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot }
     window.setTimeout(() => setCopiedSave(false), 2000);
   };
 
+  const currentDisplaySize: DisplaySizePreference = state.settings.displaySize ?? 'auto';
+
   return (
     <div className="flex flex-col gap-3">
+      {/* Display Size (Integer Pixel Scale Tier Shift ±1) */}
+      <div className="rounded-xl border border-[#72c4d6]/35 bg-[#103044]/72 p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2 min-w-0">
+            <Monitor className="mt-0.5 h-4 w-4 shrink-0 text-[#8df5da]" />
+            <div className="min-w-0">
+              <div className="text-sm font-bold text-white">{t('SETTINGS_DISPLAY_SIZE')}</div>
+              <div className="text-[11px] leading-snug text-[#9ecbd9]">
+                {t('SETTINGS_DISPLAY_SIZE_DESC')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          role="radiogroup"
+          aria-label={t('SETTINGS_DISPLAY_SIZE')}
+          className="mt-2.5 grid grid-cols-3 gap-1.5"
+        >
+          {DISPLAY_SIZE_OPTIONS.map((opt) => {
+            const isActive = currentDisplaySize === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                role="radio"
+                aria-checked={isActive}
+                onClick={() => engine.updateSettings({ displaySize: opt.id })}
+                className={`min-h-[44px] flex items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
+                  isActive
+                    ? 'border-[#8df5da] bg-[#1a5666]/90 text-white shadow-sm'
+                    : 'border-[#5ba6ba]/25 bg-[#0b2333]/75 text-[#cceaf5] hover:border-[#7ec8db]/55 hover:bg-[#13384d]/80'
+                }`}
+              >
+                <span className="truncate">{t(opt.labelKey)}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-2 text-[11px] font-medium text-[#8fd9c8] tabular-nums">
+          {t('SETTINGS_DISPLAY_SIZE_ACTIVE', {
+            tier: viewport.effectiveTier,
+            scale: viewport.worldScale,
+          })}
+        </div>
+      </div>
+
       {/* Language Settings UI — Instant live switcher without resetting progress */}
       <div className="rounded-xl border border-[#72c4d6]/35 bg-[#103044]/72 p-3">
         <div className="flex items-center gap-2">
@@ -46,7 +106,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot }
                 key={lang.id}
                 type="button"
                 onClick={() => setLocale(lang.id)}
-                className={`min-h-[42px] flex items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${
+                className={`min-h-[44px] flex items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${
                   isActive
                     ? 'border-[#8df5da] bg-[#1a5666]/90 text-white shadow-sm'
                     : 'border-[#5ba6ba]/25 bg-[#0b2333]/75 text-[#cceaf5] hover:border-[#7ec8db]/55 hover:bg-[#13384d]/80'
@@ -70,7 +130,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot }
         <label className="flex min-h-[52px] cursor-pointer items-center justify-between gap-3 py-2">
           <div className="min-w-0">
             <div className="text-sm font-semibold text-white">{t('SETTINGS_SOUND')}</div>
-            <div className="text-xs text-[#9ecbd9]">Soft chimes, splashes, and discovery chords</div>
+            <div className="text-xs text-[#9ecbd9]">{t('SETTINGS_SOUND_DESC')}</div>
           </div>
           <input
             type="checkbox"
@@ -83,7 +143,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot }
         <label className="flex min-h-[52px] cursor-pointer items-center justify-between gap-3 py-2">
           <div className="min-w-0">
             <div className="text-sm font-semibold text-white">{t('SETTINGS_AMBIENT')}</div>
-            <div className="text-xs text-[#9ecbd9]">Gentle underwater bubble murmurs</div>
+            <div className="text-xs text-[#9ecbd9]">{t('SETTINGS_AMBIENT_DESC')}</div>
           </div>
           <input
             type="checkbox"
@@ -96,7 +156,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot }
         <label className="flex min-h-[52px] cursor-pointer items-center justify-between gap-3 py-2">
           <div className="min-w-0">
             <div className="text-sm font-semibold text-white">{t('SETTINGS_REDUCED_MOTION')}</div>
-            <div className="text-xs text-[#9ecbd9]">Softens tutorial pulse and pointer motion</div>
+            <div className="text-xs text-[#9ecbd9]">{t('SETTINGS_REDUCED_MOTION_DESC')}</div>
           </div>
           <input
             type="checkbox"
@@ -125,11 +185,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ engine, snapshot }
 
       {/* Offline Cap & Save Info */}
       <div className="rounded-xl border border-[#5ba6ba]/25 bg-[#103044]/68 p-3 text-xs text-[#9ecbd9] space-y-1">
-        <div className="font-semibold text-white">Aquarium Persistence (v2)</div>
+        <div className="font-semibold text-white">
+          {t('SETTINGS_PERSISTENCE_TITLE', { version: GAME_CONFIG.SAVE_VERSION })}
+        </div>
         <p>
-          All 8 aquariums save automatically and continue growing, breeding, and earning{' '}
-          {t('UI_COINS')} &amp; {t('UI_RP')} offline for up to{' '}
-          <strong className="text-[#ffe694]">{GAME_CONFIG.DEFAULT_OFFLINE_CAP_HOURS}h</strong>.
+          {t('SETTINGS_PERSISTENCE_DESC', {
+            maps: HABITAT_CATALOG.length,
+            coins: t('UI_COINS'),
+            rp: t('UI_RP'),
+            hours: GAME_CONFIG.DEFAULT_OFFLINE_CAP_HOURS,
+          })}
         </p>
         <div className="pt-2 flex flex-wrap gap-2">
           <button

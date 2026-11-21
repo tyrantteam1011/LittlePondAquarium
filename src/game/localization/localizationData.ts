@@ -1,16 +1,21 @@
 import { LocaleId, TranslationEntry } from './types';
 import { FISH_LOCALIZATION_TABLE } from './fishLocalizationData';
 import { DECOR_LOCALIZATION_TABLE } from './decorLocalizationData';
+import { CATALOG_LOCALIZATION_TABLE } from './catalogLocalizationData';
+import { UI_LOCALIZATION_TABLE } from './uiLocalizationData';
 
 /**
  * Structured Multi-Language Localization Table (Single Source of Truth)
  * Languages: vi-VN, en-US, de-DE, pt-PT, ms-MY, zh-CN
  * All player-facing UI, tutorial steps, contextual hints, maps, fish, creatures,
- * decorations, rarities, growth stages, and modals resolve through these stable keys.
+ * decorations, research, upgrades, missions, events, milestones, rarities,
+ * growth stages, and modals resolve through these stable keys.
  */
 export const LOCALIZATION_TABLE: Record<string, TranslationEntry> = {
   ...FISH_LOCALIZATION_TABLE,
   ...DECOR_LOCALIZATION_TABLE,
+  ...CATALOG_LOCALIZATION_TABLE,
+  ...UI_LOCALIZATION_TABLE,
   // ==================== LANGUAGE SELECTION & SETTINGS ====================
   LANG_SELECT_TITLE: {
     'vi-VN': 'Chọn Ngôn Ngữ',

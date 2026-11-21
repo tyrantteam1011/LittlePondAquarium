@@ -11,6 +11,8 @@ import {
   getEggSprite,
   getFishSprite,
 } from './PixelArtSprites';
+import { LAYOUT_CONFIG, SafeSwimBounds } from '../layout/layoutConfig';
+import { mapNormalizedYToSafeBounds } from '../layout/scaleTiers';
 
 /**
  * Crisp Integer-Scaled 16-Bit Pixel Art Aquarium Renderer (v2)
@@ -39,11 +41,17 @@ export class AquariumRenderer {
       selectedDecorId: string | null;
       placingDecorId: string | null;
       hoverNormPos: { x: number; y: number } | null;
+      worldScale?: number;
+      renderDpr?: number;
+      safeBounds?: SafeSwimBounds;
     }
-  ): { worldWidth: number; worldHeight: number } {
-    const cssW = targetCanvas.clientWidth || 360;
-    const cssH = targetCanvas.clientHeight || 560;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  ): { worldWidth: number; worldHeight: number; worldScale: number } {
+    const cssW = Math.max(120, targetCanvas.clientWidth || 360);
+    const cssH = Math.max(120, targetCanvas.clientHeight || 560);
+    const dpr = Math.max(
+      1,
+      Math.min(3, Math.round(options.renderDpr ?? (window.devicePixelRatio || 1)))
+    );
 
     const desiredTargetW = Math.round(cssW * dpr);
     const desiredTargetH = Math.round(cssH * dpr);
@@ -52,9 +60,22 @@ export class AquariumRenderer {
       targetCanvas.height = desiredTargetH;
     }
 
-    this.pixelScale = cssW >= 900 ? 3 : 2.5;
-    const worldW = Math.max(180, Math.round(cssW / this.pixelScale));
-    const worldH = Math.max(200, Math.round(cssH / this.pixelScale));
+    // Luôn dùng hệ số pixel NGUYÊN (1×, 2×, 3×, 4×) đồng đều cho cả trục X và Y
+    this.pixelScale = Math.max(
+      LAYOUT_CONFIG.MIN_WORLD_SCALE,
+      Math.min(LAYOUT_CONFIG.MAX_WORLD_SCALE, Math.round(options.worldScale ?? (cssW > 600 ? 3 : 2)))
+    );
+    const worldW = Math.max(LAYOUT_CONFIG.MIN_WORLD_WIDTH, Math.ceil(cssW / this.pixelScale));
+    const worldH = Math.max(LAYOUT_CONFIG.MIN_WORLD_HEIGHT, Math.ceil(cssH / this.pixelScale));
+
+    const safeBounds: SafeSwimBounds = options.safeBounds ?? {
+      waterTopNorm: LAYOUT_CONFIG.CANONICAL_WATER_TOP_NORM,
+      floorNorm: LAYOUT_CONFIG.CANONICAL_FLOOR_NORM,
+      safeLeftNorm: 0.02,
+      safeRightNorm: 0.98,
+    };
+
+    sim.setSafeBounds(safeBounds);
 
     if (this.bufferCanvas.width !== worldW || this.bufferCanvas.height !== worldH) {
       this.bufferCanvas.width = worldW;
@@ -70,8 +91,8 @@ export class AquariumRenderer {
     const activeBg = state.activeBackgrounds[state.activeHabitatId];
     const hasGoldenTint = activeBg === 'golden_hour_tint';
     const hasReefLight = activeBg === 'reef_light';
-    const waterLineY = Math.floor(worldH * 0.11);
-    const floorY = Math.floor(worldH * 0.84);
+    const waterLineY = Math.floor(worldH * safeBounds.waterTopNorm);
+    const floorY = Math.floor(worldH * safeBounds.floorNorm);
 
     // 1. Stepped Pixel Water Gradient
     const bandCount = 12;
@@ -214,7 +235,8 @@ export class AquariumRenderer {
         worldW,
         worldH,
         timeSec,
-        options.selectedDecorId === decor.instanceId
+        options.selectedDecorId === decor.instanceId,
+        safeBounds
       );
     }
 
@@ -241,7 +263,8 @@ export class AquariumRenderer {
       const def = FISH_BY_ID[egg.fishId];
       const sprite = getEggSprite(def?.palette.primary ?? '#ffd980', egg.variant);
       const ex = Math.round(egg.x * worldW);
-      const ey = Math.round(egg.y * worldH + Math.sin(timeSec * 3.5 + egg.x * 10) * 1.2);
+      const mappedEggY = mapNormalizedYToSafeBounds(egg.y, safeBounds);
+      const ey = Math.round(mappedEggY * worldH + Math.sin(timeSec * 3.5 + egg.x * 10) * 1.2);
       // Soft glowing aura around egg
       ctx.fillStyle =
         egg.variant !== 'normal' ? 'rgba(255, 232, 140, 0.28)' : 'rgba(180, 245, 255, 0.22)';
@@ -429,25 +452,17 @@ export class AquariumRenderer {
     }
     ctx.globalAlpha = 1;
 
-    // 17. Crisp Nearest-Neighbor Blit
+    // 17. Crisp Nearest-Neighbor Integer-Scale Blit (tỷ lệ X = Y = worldScale * dpr)
     const targetCtx = targetCanvas.getContext('2d');
     if (targetCtx) {
       targetCtx.imageSmoothingEnabled = false;
       targetCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
-      targetCtx.drawImage(
-        this.bufferCanvas,
-        0,
-        0,
-        worldW,
-        worldH,
-        0,
-        0,
-        targetCanvas.width,
-        targetCanvas.height
-      );
+      const destW = worldW * this.pixelScale * dpr;
+      const destH = worldH * this.pixelScale * dpr;
+      targetCtx.drawImage(this.bufferCanvas, 0, 0, worldW, worldH, 0, 0, destW, destH);
     }
 
-    return { worldWidth: worldW, worldHeight: worldH };
+    return { worldWidth: worldW, worldHeight: worldH, worldScale: this.pixelScale };
   }
 
   private drawGlassAlgae(
@@ -517,14 +532,16 @@ export class AquariumRenderer {
     worldW: number,
     worldH: number,
     timeSec: number,
-    isSelected: boolean
+    isSelected: boolean,
+    safeBounds: SafeSwimBounds
   ): void {
     const def = DECORATION_BY_ID[decor.decorationId];
     if (!def) return;
     const sprite = getDecorationSprite(def);
 
     const anchorX = Math.round(decor.x * worldW);
-    const anchorY = Math.round(decor.y * worldH);
+    const mappedY = mapNormalizedYToSafeBounds(decor.y, safeBounds);
+    const anchorY = Math.round(mappedY * worldH);
 
     const isSwaying =
       def.category === 'Plants' || def.shape === 'sea_fan' || def.shape === 'anemone';

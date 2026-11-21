@@ -17,7 +17,17 @@ interface UpgradePanelProps {
 
 export const UpgradePanel: React.FC<UpgradePanelProps> = ({ engine, snapshot }) => {
   const [scope, setScope] = useState<'local' | 'global'>('local');
-  const { t, formatNumber, getHabitatName } = useLocalization();
+  const {
+    t,
+    formatNumber,
+    getHabitatName,
+    getLocalUpgradeName,
+    getLocalUpgradeDescription,
+    getLocalUpgradeUnit,
+    getGlobalUpgradeName,
+    getGlobalUpgradeDescription,
+    getGlobalUpgradeUnit,
+  } = useLocalization();
   const { state, activeMapState } = snapshot;
   const activeHabitat = HABITAT_BY_ID[state.activeHabitatId] ?? HABITAT_BY_ID.pond;
   const activeHabitatLabel = getHabitatName(activeHabitat);
@@ -68,20 +78,22 @@ export const UpgradePanel: React.FC<UpgradePanelProps> = ({ engine, snapshot }) 
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-bold text-white">{u.name}</span>
+                      <span className="truncate text-sm font-bold text-white">
+                        {getLocalUpgradeName(u)}
+                      </span>
                       <span className="shrink-0 text-[11px] font-semibold text-[#8df5da] tabular-nums">
                         {t('UI_LEVEL_SHORT')}{level}/{u.maxLevel}
                       </span>
                     </div>
                     <p className="mt-0.5 text-[11px] leading-snug text-[#94c2d1]">
-                      {u.description}
+                      {getLocalUpgradeDescription(u)}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-2.5 flex items-center justify-between gap-2">
                   <div className="text-xs font-semibold text-[#ffe394] tabular-nums">
-                    {currentVal} {u.unit}
+                    {currentVal} {getLocalUpgradeUnit(u)}
                     {!isMax && <span className="text-[#8df5da]"> → {nextVal}</span>}
                   </div>
 
@@ -123,20 +135,22 @@ export const UpgradePanel: React.FC<UpgradePanelProps> = ({ engine, snapshot }) 
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-bold text-white">{u.name}</span>
+                      <span className="truncate text-sm font-bold text-white">
+                        {getGlobalUpgradeName(u)}
+                      </span>
                       <span className="shrink-0 text-[11px] font-semibold text-[#9be7ff] tabular-nums">
                         {t('UI_LEVEL_SHORT')}{level}/{u.maxLevel}
                       </span>
                     </div>
                     <p className="mt-0.5 text-[11px] leading-snug text-[#94c2d1]">
-                      {u.description}
+                      {getGlobalUpgradeDescription(u)}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-2.5 flex items-center justify-between gap-2">
                   <div className="text-xs font-semibold text-[#ffe394] tabular-nums">
-                    {formatUpgradeValue(u, level)} {u.unit}
+                    {formatUpgradeValue(u, level)} {getGlobalUpgradeUnit(u)}
                     {!isMax && (
                       <span className="text-[#8df5da]">
                         {' '}

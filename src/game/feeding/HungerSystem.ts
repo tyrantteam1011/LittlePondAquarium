@@ -8,6 +8,7 @@ import {
 } from '../core/types';
 import { FISH_BY_ID } from '../data/fishCatalog';
 import { CREATURE_BY_ID } from '../data/creatureCatalog';
+import { LocalizationManager } from '../localization/LocalizationManager';
 
 export interface HungerMultipliers {
   band: HungerBand;
@@ -244,13 +245,13 @@ export function getMapHungerSummary(
   const warnings: string[] = [];
 
   if (criticalFishCount > 0 || starvingFishCount > 0) {
-    warnings.push('Some fish are at risk! Feed your aquarium immediately.');
+    warnings.push(LocalizationManager.get('WARN_FISH_AT_RISK'));
   } else if (hungryFishCount > 0 || avgHunger < 65) {
-    warnings.push('Your fish are hungry!');
+    warnings.push(LocalizationManager.get('WARN_FISH_HUNGRY'));
   }
 
   if (foodStored < Math.max(10, foodCapacity * 0.12)) {
-    warnings.push('Food supplies are running low.');
+    warnings.push(LocalizationManager.get('WARN_FOOD_LOW'));
   }
 
   return {

@@ -3,7 +3,7 @@ import { EngineSnapshot, GameEngine } from '../../game/core/GameEngine';
 import { MISSION_BY_ID } from '../../game/data/missionCatalog';
 import { EVENT_CATALOG } from '../../game/data/eventCatalog';
 import { IAPService } from '../../game/services/IAPService';
-import { formatDuration, formatNumber } from '../../game/core/GameConfig';
+import { useLocalization } from '../../game/localization/LocalizationManager';
 import { Check, PlayCircle, Sparkles, ShoppingBag, Calendar } from 'lucide-react';
 
 interface MissionsPanelProps {
@@ -14,6 +14,20 @@ interface MissionsPanelProps {
 export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }) => {
   const { state } = snapshot;
   const [subTab, setSubTab] = useState<'missions' | 'boosts' | 'shop'>('missions');
+  const {
+    t,
+    formatNumber,
+    formatDuration,
+    getEventName,
+    getEventObjective,
+    getEventReward,
+    getMissionTitle,
+    getMissionDescription,
+    getMissionReward,
+    getIapName,
+    getIapDescription,
+    getIapTag,
+  } = useLocalization();
 
   const adBoostRemainingSec = Math.max(0, Math.floor((state.adBoostEndsAt - Date.now()) / 1000));
   const products = IAPService.getProducts();
@@ -28,29 +42,29 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
         <button
           type="button"
           onClick={() => setSubTab('missions')}
-          className={`min-h-[36px] rounded-lg text-xs font-semibold ${
+          className={`min-h-[36px] rounded-lg px-1 text-xs font-semibold truncate ${
             subTab === 'missions' ? 'bg-[#1e5c6b] text-white' : 'text-[#97c4d4] hover:text-white'
           }`}
         >
-          Quests &amp; Events
+          {t('MISSIONS_TAB_QUESTS')}
         </button>
         <button
           type="button"
           onClick={() => setSubTab('boosts')}
-          className={`min-h-[36px] rounded-lg text-xs font-semibold ${
+          className={`min-h-[36px] rounded-lg px-1 text-xs font-semibold truncate ${
             subTab === 'boosts' ? 'bg-[#1e5c6b] text-white' : 'text-[#97c4d4] hover:text-white'
           }`}
         >
-          Bonus Boosts
+          {t('MISSIONS_TAB_BOOSTS')}
         </button>
         <button
           type="button"
           onClick={() => setSubTab('shop')}
-          className={`min-h-[36px] rounded-lg text-xs font-semibold ${
+          className={`min-h-[36px] rounded-lg px-1 text-xs font-semibold truncate ${
             subTab === 'shop' ? 'bg-[#1e5c6b] text-white' : 'text-[#97c4d4] hover:text-white'
           }`}
         >
-          Gem Shop
+          {t('MISSIONS_TAB_SHOP')}
         </button>
       </div>
 
@@ -62,19 +76,21 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[#8df5da]">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>Weekly Event · {activeEvent.name}</span>
+                  <Calendar className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">
+                    {t('EVENT_WEEKLY_HEADER', { name: getEventName(activeEvent) })}
+                  </span>
                 </div>
-                <p className="mt-0.5 text-xs text-[#d6f4fc]">{activeEvent.objectiveText}</p>
+                <p className="mt-0.5 text-xs text-[#d6f4fc]">{getEventObjective(activeEvent)}</p>
                 <div className="mt-1 text-[11px] font-semibold text-[#ffe694]">
-                  Reward: {activeEvent.rewardLabel}
+                  {t('UI_REWARD_PREFIX', { reward: getEventReward(activeEvent) })}
                 </div>
               </div>
 
               {state.weeklyEventClaimed ? (
                 <span className="flex items-center gap-1 text-xs font-bold text-[#8df5da] shrink-0">
                   <Check className="h-4 w-4" />
-                  Claimed
+                  {t('UI_CLAIMED')}
                 </span>
               ) : (
                 <button
@@ -88,7 +104,7 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
                   }`}
                 >
                   {eventReady
-                    ? 'Claim'
+                    ? t('UI_CLAIM')
                     : `${Math.min(state.weeklyEventProgress, activeEvent.target)}/${activeEvent.target}`}
                 </button>
               )}
@@ -116,16 +132,16 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-bold text-white">{def.title}</h4>
-                      <p className="text-xs text-[#9ecbd9]">{def.description}</p>
+                      <h4 className="text-sm font-bold text-white">{getMissionTitle(def)}</h4>
+                      <p className="text-xs text-[#9ecbd9]">{getMissionDescription(def)}</p>
                       <div className="mt-1 text-[11px] font-semibold text-[#ffe694]">
-                        Reward: {def.reward.label}
+                        {t('UI_REWARD_PREFIX', { reward: getMissionReward(def) })}
                       </div>
                     </div>
                     <div className="shrink-0">
                       {active.claimed ? (
                         <span className="flex items-center gap-1 text-xs font-semibold text-[#7ae0c6]">
-                          <Check className="h-4 w-4" /> Done
+                          <Check className="h-4 w-4" /> {t('UI_DONE')}
                         </span>
                       ) : (
                         <button
@@ -138,7 +154,7 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
                               : 'bg-[#143345] text-[#7ca3b3]'
                           }`}
                         >
-                          {ready ? 'Claim' : `${pct}%`}
+                          {ready ? t('UI_CLAIM') : `${pct}%`}
                         </button>
                       )}
                     </div>
@@ -165,10 +181,10 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
       {subTab === 'boosts' && (
         <div className="space-y-2.5">
           <p className="text-xs text-[#9ecbd9]">
-            Optional cozy boosts — never required, always rewarding.
+            {t('BOOSTS_SUBTITLE')}
             {state.adRemoved && (
               <span className="ml-1 font-semibold text-[#8df5da]">
-                Ad-Free active (instant rewards)!
+                {t('BOOSTS_AD_FREE_ACTIVE')}
               </span>
             )}
           </p>
@@ -177,12 +193,14 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
             <div>
               <div className="flex items-center gap-1.5 text-sm font-bold text-white">
                 <Sparkles className="h-4 w-4 text-[#ffe38a]" />
-                <span>2× Income · 30 Minutes</span>
+                <span>{t('BOOST_2X_TITLE')}</span>
               </div>
               <p className="mt-0.5 text-xs text-[#9ecbd9]">
                 {adBoostRemainingSec > 0
-                  ? `Active now: ${formatDuration(adBoostRemainingSec)} remaining`
-                  : 'Double all coin earnings across every habitat.'}
+                  ? t('BOOST_2X_ACTIVE_REMAINING', {
+                      duration: formatDuration(adBoostRemainingSec),
+                    })
+                  : t('BOOST_2X_DESC')}
               </p>
             </div>
             <button
@@ -191,16 +209,14 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
               className="pixel-btn min-h-[42px] shrink-0 flex items-center gap-1.5 rounded-lg bg-[#2c8a7a] px-3 text-xs font-bold text-white hover:bg-[#35a18f] whitespace-nowrap"
             >
               <PlayCircle className="h-4 w-4" />
-              <span>{state.adRemoved ? 'Activate' : 'Watch Ad'}</span>
+              <span>{state.adRemoved ? t('UI_ACTIVATE') : t('UI_WATCH_AD')}</span>
             </button>
           </div>
 
           <div className="rounded-xl border border-[#5ba6ba]/25 bg-[#103044]/68 p-3 flex items-center justify-between gap-3">
             <div>
-              <h4 className="text-sm font-bold text-white">Rare Fish Discovery</h4>
-              <p className="mt-0.5 text-xs text-[#9ecbd9]">
-                Attract an undiscovered species straight to your journal + Gems &amp; RP.
-              </p>
+              <h4 className="text-sm font-bold text-white">{t('BOOST_RARE_TITLE')}</h4>
+              <p className="mt-0.5 text-xs text-[#9ecbd9]">{t('BOOST_RARE_DESC')}</p>
             </div>
             <button
               type="button"
@@ -208,16 +224,14 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
               className="pixel-btn min-h-[42px] shrink-0 flex items-center gap-1.5 rounded-lg bg-[#2e7da6] px-3 text-xs font-bold text-white hover:bg-[#3a96c4] whitespace-nowrap"
             >
               <PlayCircle className="h-4 w-4" />
-              <span>{state.adRemoved ? 'Discover' : 'Watch Ad'}</span>
+              <span>{state.adRemoved ? t('UI_DISCOVER') : t('UI_WATCH_AD')}</span>
             </button>
           </div>
 
           <div className="rounded-xl border border-[#5ba6ba]/25 bg-[#103044]/68 p-3 flex items-center justify-between gap-3">
             <div>
-              <h4 className="text-sm font-bold text-white">Extra Tide Bonus</h4>
-              <p className="mt-0.5 text-xs text-[#9ecbd9]">
-                Collect 3 minutes of instant bonus aquarium coins right away.
-              </p>
+              <h4 className="text-sm font-bold text-white">{t('BOOST_TIDE_TITLE')}</h4>
+              <p className="mt-0.5 text-xs text-[#9ecbd9]">{t('BOOST_TIDE_DESC')}</p>
             </div>
             <button
               type="button"
@@ -225,7 +239,7 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
               className="pixel-btn min-h-[42px] shrink-0 flex items-center gap-1.5 rounded-lg bg-[#d98c2b] px-3 text-xs font-bold text-white hover:bg-[#eb9c38] whitespace-nowrap"
             >
               <PlayCircle className="h-4 w-4" />
-              <span>{state.adRemoved ? 'Claim' : 'Watch Ad'}</span>
+              <span>{state.adRemoved ? t('UI_CLAIM') : t('UI_WATCH_AD')}</span>
             </button>
           </div>
         </div>
@@ -234,12 +248,10 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
       {/* Placeholder IAP Store */}
       {subTab === 'shop' && (
         <div className="space-y-2.5">
-          <p className="text-xs text-[#9ecbd9]">
-            Prototype Store Interface (no real payments charged). Core aquarium progression is 100%
-            playable free.
-          </p>
+          <p className="text-xs text-[#9ecbd9]">{t('SHOP_PROTOTYPE_NOTICE')}</p>
           {products.map((p) => {
             const alreadyOwned = Boolean(p.removesAds && state.adRemoved);
+            const localizedTag = getIapTag(p.id);
             return (
               <div
                 key={p.id}
@@ -248,14 +260,14 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <ShoppingBag className="h-3.5 w-3.5 text-[#8eeeff] shrink-0" />
-                    <h4 className="text-sm font-bold text-white">{p.name}</h4>
-                    {p.highlightTag && (
+                    <h4 className="text-sm font-bold text-white">{getIapName(p.id)}</h4>
+                    {localizedTag && (
                       <span className="text-[11px] font-semibold text-[#ffe694]">
-                        · {p.highlightTag}
+                        · {localizedTag}
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-[#9ecbd9]">{p.description}</p>
+                  <p className="mt-0.5 text-xs text-[#9ecbd9]">{getIapDescription(p.id)}</p>
                 </div>
                 <button
                   type="button"
@@ -267,7 +279,7 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({ engine, snapshot }
                       : 'bg-[#2c8a7a] text-white hover:bg-[#35a18f]'
                   }`}
                 >
-                  {alreadyOwned ? 'Owned' : p.priceDisplay}
+                  {alreadyOwned ? t('UI_OWNED') : p.priceDisplay}
                 </button>
               </div>
             );

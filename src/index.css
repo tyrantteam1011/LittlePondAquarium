@@ -4,6 +4,10 @@
   :root {
     --font-pixel: 'Silkscreen', 'Be Vietnam Pro', 'Noto Sans SC', system-ui, sans-serif;
     --font-sans: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    --ui-scale: 1;
+    --hud-top-px: 64px;
+    --hud-bottom-px: 118px;
+    --kb-height-px: 0px;
   }
 
   html[lang='vi'],
@@ -19,11 +23,13 @@
   body,
   #root {
     height: 100%;
+    height: 100dvh;
     width: 100%;
     margin: 0;
     padding: 0;
     font-family: var(--font-sans);
     touch-action: manipulation;
+    overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
   }
 }

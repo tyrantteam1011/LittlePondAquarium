@@ -36,7 +36,16 @@ interface FeedingPanelProps {
 }
 
 export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) => {
-  const { t, formatNumber, getHabitatName } = useLocalization();
+  const {
+    t,
+    tPlural,
+    formatNumber,
+    getHabitatName,
+    getHabitatToken,
+    getMapFoodName,
+    getAutoFeederNodeName,
+    getAutoFeederNodeDescription,
+  } = useLocalization();
   const { state, activeMapState, ecosystem } = snapshot;
   const habId = state.activeHabitatId;
   const habitat = HABITAT_BY_ID[habId] ?? HABITAT_BY_ID.pond;
@@ -100,7 +109,9 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
               style={{ backgroundColor: foodInfo.pelletColor }}
             />
             <div className="min-w-0">
-              <div className="truncate text-sm font-bold text-white">{foodInfo.foodName}</div>
+              <div className="truncate text-sm font-bold text-white">
+                {getMapFoodName(habId)}
+              </div>
               <div className="text-[11px] text-[#9ecbd9]">
                 {mapLabel} · {t('FEED_AVG_HUNGER')}:{' '}
                 <span className={`font-bold tabular-nums ${hungerTone}`}>
@@ -132,7 +143,7 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
           <span className="flex items-center gap-1">
             <Zap className="h-3 w-3 text-[#ffe394]" />
             {nextChargeSec > 0
-              ? `${t('FEED_RECHARGE')}: ${nextChargeSec}s`
+              ? `${t('FEED_RECHARGE')}: ${t('UI_SEC_SHORT', { sec: nextChargeSec })}`
               : t('FEED_ENERGY_FULL')}
           </span>
           <span className="text-[#8df5da]">
@@ -145,8 +156,8 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
             <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-[#ff9b9b]" />
             <span>
               {ecosystem.criticalFishCount > 0
-                ? `${ecosystem.criticalFishCount} fish critically starving!`
-                : `${ecosystem.starvingFishCount} fish starving — feed now!`}
+                ? tPlural('FEED_ALERT_CRITICAL', ecosystem.criticalFishCount)
+                : tPlural('FEED_ALERT_STARVING', ecosystem.starvingFishCount)}
             </span>
           </div>
         )}
@@ -158,7 +169,7 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
           <div className="flex items-center gap-1.5 font-bold text-white">
             <Package className="h-4 w-4 text-[#8df5da]" />
             <span>
-              {t('FEED_STORAGE')} Lv.{activeMapState.foodStorageLevel}/{MAX_FOOD_STORAGE_LEVEL}
+              {t('FEED_STORAGE')} {t('UI_LEVEL_SHORT')}{activeMapState.foodStorageLevel}/{MAX_FOOD_STORAGE_LEVEL}
             </span>
           </div>
           <span className="font-bold text-[#ffe694] tabular-nums">
@@ -214,13 +225,13 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
             <div className="flex items-center gap-1.5 text-xs font-bold text-white">
               <Factory className="h-4 w-4 text-[#9be7ff]" />
               <span>
-                {t('FEED_FACTORY')} Lv.{activeMapState.foodFactoryLevel}/{MAX_FOOD_FACTORY_LEVEL}
+                {t('FEED_FACTORY')} {t('UI_LEVEL_SHORT')}{activeMapState.foodFactoryLevel}/{MAX_FOOD_FACTORY_LEVEL}
               </span>
             </div>
             <div className="mt-1 text-[11px] text-[#9ecbd9] tabular-nums">
-              +{factoryRate}/m · -{consumptionRate}/m ·{' '}
+              +{factoryRate}{t('UI_PER_MIN')} · -{consumptionRate}{t('UI_PER_MIN')} ·{' '}
               <span className={netRate >= 0 ? 'text-[#8df5da] font-semibold' : 'text-[#ff9b9b] font-semibold'}>
-                Net {netRate >= 0 ? `+${netRate}` : netRate}/m
+                {t('FEED_NET_RATE', { rate: netRate >= 0 ? `+${netRate}` : String(netRate) })}
               </span>
             </div>
           </div>
@@ -250,13 +261,20 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
               <Bot className="h-4 w-4 text-[#8df5da]" />
               <span>
                 {t('FEED_AUTO_FEEDER')}{' '}
-                {autoStats.enabled ? `Lv.${autoStats.level}/${MAX_AUTO_FEEDER_LEVEL}` : '(OFF)'}
+                {autoStats.enabled
+                  ? `${t('UI_LEVEL_SHORT')}${autoStats.level}/${MAX_AUTO_FEEDER_LEVEL}`
+                  : `(${t('UI_OFF')})`}
               </span>
             </div>
             <p className="mt-0.5 text-[11px] text-[#9ecbd9] tabular-nums">
               {autoStats.enabled
-                ? `Every ${autoStats.intervalSec}s · Target ≤${autoStats.targetHungerCeiling}% · Up to ${autoStats.maxTargetsPerPulse} fish · Offline ${autoStats.offlineNutritionPct}%`
-                : 'Automatically feeds hungry fish in this map (priority: starving first, zero waste).'}
+                ? t('FEED_AUTO_SUMMARY', {
+                    sec: autoStats.intervalSec,
+                    ceiling: autoStats.targetHungerCeiling,
+                    max: autoStats.maxTargetsPerPulse,
+                    pct: autoStats.offlineNutritionPct,
+                  })
+                : t('FEED_AUTO_DESC_OFF')}
             </p>
           </div>
 
@@ -273,7 +291,7 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
             {autoMaxed
               ? t('UI_MAXED')
               : `${autoStats.enabled ? t('UI_UPGRADE') : t('UI_UNLOCK')} · ${formatNumber(autoCost.coins)}${
-                  autoCost.tokens > 0 ? ` + ${autoCost.tokens}T` : ''
+                  autoCost.tokens > 0 ? ` + ${autoCost.tokens}${t('UI_TOKEN_SHORT')}` : ''
                 }`}
           </button>
         </div>
@@ -286,7 +304,7 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
               {t('FEED_AUTO_TREE')}
             </span>
             <span className="text-[#9be7ff] tabular-nums">
-              {formatNumber(activeMapState.mapTokens)} {habitat.tokenName}
+              {formatNumber(activeMapState.mapTokens)} {getHabitatToken(habitat)}
             </span>
           </div>
 
@@ -312,15 +330,15 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-                    <span className="truncate">{node.name}</span>
+                    <span className="truncate">{getAutoFeederNodeName(node.id)}</span>
                     <span className="text-[10px] text-[#8df5da] tabular-nums shrink-0">
-                      Lv.{lv}/{node.maxLevel}
+                      {t('UI_LEVEL_SHORT')}{lv}/{node.maxLevel}
                     </span>
                   </div>
                   <div className="text-[10px] text-[#9ecbd9] leading-snug">
                     {reqMet
-                      ? node.description
-                      : `Requires Auto Feeder Lv.${node.minAutoFeederLevel}`}
+                      ? getAutoFeederNodeDescription(node.id)
+                      : t('FEED_AUTO_REQUIRES', { level: node.minAutoFeederLevel })}
                   </div>
                 </div>
 
@@ -338,7 +356,7 @@ export const FeedingPanel: React.FC<FeedingPanelProps> = ({ engine, snapshot }) 
                 >
                   {maxed
                     ? t('UI_MAXED')
-                    : `${formatNumber(cost.coins)}${cost.tokens > 0 ? ` + ${cost.tokens}T` : ''}`}
+                    : `${formatNumber(cost.coins)}${cost.tokens > 0 ? ` + ${cost.tokens}${t('UI_TOKEN_SHORT')}` : ''}`}
                 </button>
               </div>
             );

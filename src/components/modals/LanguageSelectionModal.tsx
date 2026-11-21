@@ -31,7 +31,7 @@ export const LanguageSelectionModal: React.FC = () => {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Select Language"
+      aria-label={t('LANG_SELECT_TITLE')}
       className="glass-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4"
     >
       <div className="glass-panel w-full max-w-md rounded-2xl border border-[#84e3d2]/60 p-5 shadow-2xl">

@@ -2,6 +2,7 @@
  * Abstract In-App Purchase Service Interface (Phase 3 Monetization Architecture)
  * TODO: Bind to Apple StoreKit / Google Play Billing / RevenueCat adapter in native mobile build.
  */
+import { LocalizationManager } from '../localization/LocalizationManager';
 
 export interface IAPProduct {
   id: string;
@@ -74,13 +75,19 @@ class PrototypeIAPService implements IIAPService {
   async purchaseProduct(productId: string): Promise<IAPPurchaseResult> {
     const product = IAP_PRODUCTS.find((p) => p.id === productId);
     if (!product) {
-      return { success: false, productId, message: 'Product not found.' };
+      return {
+        success: false,
+        productId,
+        message: LocalizationManager.get('SHOP_ERR_NOT_FOUND'),
+      };
     }
     // Simulated prototype purchase confirmation
     return {
       success: true,
       productId,
-      message: `${product.name} unlocked (Prototype Mode).`,
+      message: LocalizationManager.get('SHOP_MSG_UNLOCKED', {
+        name: LocalizationManager.getIapName(product.id),
+      }),
     };
   }
 }
